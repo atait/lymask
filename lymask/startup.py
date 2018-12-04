@@ -1,6 +1,9 @@
+''' This stuff only runs in GUI mode '''
 from lygadgets import pya
 import glob
 import os
+
+from lymask import gui_main
 
 DEFAULT_TECH = 'OLMAC'
 
