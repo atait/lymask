@@ -30,3 +30,5 @@ Todo: put tokens of these functions in here.
 To test command line and API, run `pytest tests`
 
 You can also go in the GUI and do it there, but that has to be manual
+
+This is also CI tested by Travis
