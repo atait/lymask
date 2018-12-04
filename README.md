@@ -25,3 +25,8 @@ Dataprep processes are defined in YAML files in the "dataprep" directory. They c
 - alignment marks, fiducials?
 
 Todo: put tokens of these functions in here.
+
+## Running tests
+To test command line and API, run `pytest tests`
+
+You can also go in the GUI and do it there, but that has to be manual

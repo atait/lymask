@@ -2,6 +2,7 @@
 '''
 import argparse
 import os
+import subprocess
 
 from lymask import batch_main
 from lymask import __version__
@@ -16,7 +17,7 @@ parser.add_argument('outfile', nargs='?', default=None,
 parser.add_argument('-v', '--version', action='version', version=f'%(prog)s v{__version__}')
 
 
-def main():
+def cm_main():
     ''' This calls klayout from command line using global variables '''
     args = parser.parse_args()
 
@@ -41,7 +42,7 @@ def main():
 
 # When the technology starts working, use this instead
 
-# def main():
+# def cm_main():
 #     ''' This one uses the klayout standalone '''
 #     args = parser.parse_args()
 #     batch_main(args.infile.name, ymlfile=args.ymlfile, outfile=args.outfile)
