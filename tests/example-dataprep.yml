@@ -1,6 +1,5 @@
 # Here is dataprep steps with parameters. It varies by subloop.
 # For now you just have to make temporary edits here to change the subloop.
-# Later on, we can make a YAML for each subloop, then have a different menu item corresponding to each maybe
 ---
 -   - flatten
 -   - check_floorplan
@@ -24,6 +23,5 @@
       mask_m5_wiring: m5_wiring + m5_gnd + gp_photo
       mask_v3: v3
       mask_v5: v5
-      mask_su8: su8
 -   - align_corners
 ...

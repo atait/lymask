@@ -68,7 +68,7 @@ def gui_main(ymlfile=None):
 
     insert_layer_tab(tech_dataprep_layer_properties(), tab_name='Dataprep')
 
-    lv.transaction('SOEN Dataprep')
+    lv.transaction('Mask Dataprep')
     try:
         processed = _main(layout, ymlfile=ymlfile)
     finally:
