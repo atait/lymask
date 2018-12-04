@@ -1,6 +1,6 @@
 from __future__ import division, print_function, absolute_import
 from lygadgets import isGUI, pya, xml_to_dict
-from soen.siepic_utils import tech_layer_properties, get_layout_variables_no_tech
+from lymask.siepic_utils import tech_layer_properties, get_layout_variables_no_tech
 
 
 class LayerSet(dict):

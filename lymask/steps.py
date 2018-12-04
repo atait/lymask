@@ -17,7 +17,7 @@ def check_floorplan(cell, fp_safe=50):
         fp_box.enlarge(fp_safe, fp_safe)
         cell.shapes(lys.FLOORPLAN).insert(fp_box)
 
-import pdb; pdb.set_trace()
+
 @dpStep
 def flatten(cell):
     cell.flatten(True)

@@ -48,7 +48,6 @@ def dpStep(step_fun):
 ### Entry points ###
 import yaml
 def _main(layout, ymlfile):
-    import pdb; pdb.set_trace()
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
     for func_info in step_list:
