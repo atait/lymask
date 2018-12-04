@@ -3,7 +3,7 @@ from lygadgets import pya
 import glob
 import os
 
-from lymask import gui_main
+from lymask.invocation import gui_main
 
 DEFAULT_TECH = 'OLMAC'
 

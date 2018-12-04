@@ -1,4 +1,4 @@
-from soen.dataprep.library import batch_main
+from lymask import batch_main
 
 global infile, ymlfile, outfile
 try:
