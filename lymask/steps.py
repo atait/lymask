@@ -178,24 +178,24 @@ def mask_map(cell, clear_others=False, **kwargs):
             lv = gui_view()
             add_tab = True
         except UserWarning:
-            # No view is selected. We are probably in batch mode
+            # No view is selected. We might be in batch mode
             add_tab = False
-    if add_tab:
-        if lv.is_transacting():
-            lv.commit()
-            lv.transaction('Adding mask layers')
-        insert_layer_tab(tab_name='Masks')
-        for dest_layer in kwargs.keys():
-            lay_prop = pya.LayerProperties()
-            lay_prop.source_name = lys.get_as_LayerInfo(dest_layer).name
-            lay_prop.source_layer = lys.get_as_LayerInfo(dest_layer).layer
-            lay_prop.source_datatype = lys.get_as_LayerInfo(dest_layer).datatype
-            lv.init_layer_properties(lay_prop)
-            lv.insert_layer(lv.end_layers(), lay_prop)
-    if clear_others:
-        for any_layer in lys.keys():
-            if any_layer not in kwargs.keys():
-                cell.clear(lys[any_layer])
+        if add_tab:
+            if lv.is_transacting():
+                lv.commit()
+                lv.transaction('Adding mask layers')
+            insert_layer_tab(tab_name='Masks')
+            for dest_layer in kwargs.keys():
+                lay_prop = pya.LayerProperties()
+                lay_prop.source_name = lys.get_as_LayerInfo(dest_layer).name
+                lay_prop.source_layer = lys.get_as_LayerInfo(dest_layer).layer
+                lay_prop.source_datatype = lys.get_as_LayerInfo(dest_layer).datatype
+                lv.init_layer_properties(lay_prop)
+                lv.insert_layer(lv.end_layers(), lay_prop)
+        if clear_others:
+            for any_layer in lys.keys():
+                if any_layer not in kwargs.keys():
+                    cell.clear(lys[any_layer])
 
 
 @dpStep

@@ -5,6 +5,7 @@ from __future__ import division, print_function, absolute_import
 '''
 import pya
 from lygadgets.technology_patch import init_klayout_technologies, klayout_last_open_technology
+from lygadgets import patch_environment
 
 
 init_klayout_technologies()
@@ -41,21 +42,22 @@ def tech_dataprep_layer_properties():
 ## See https://github.com/lukasc-ubc/SiEPIC-Tools/blob/28deaa79533a9e213fcd664a50bc73a60e78fcbd/klayout_dot_config/python/SiEPIC/utils/__init__.py#L405
 
 def gui_view():
+    patch_environment()  # make sure the Application attribute gets into the standalone
     lv = pya.Application.instance().main_window().current_view()
-    if lv == None:
+    if lv is None:
         raise UserWarning("No view selected. Make sure you have an open layout.")
     return lv
 
 
 def gui_active_layout():
     ly = gui_view().active_cellview().layout()
-    if ly == None:
+    if ly is None:
         raise UserWarning("No layout. Make sure you have an open layout.")
     return ly
 
 
 def gui_active_cell():
     cell = gui_view().active_cellview().cell
-    if cell == None:
+    if cell is None:
         raise UserWarning("No cell. Make sure you have an open layout.")
     return cell

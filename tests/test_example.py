@@ -1,4 +1,4 @@
-import os
+import os, sys
 import subprocess
 
 from lymask import batch_main
@@ -12,17 +12,16 @@ reffile = os.path.join(test_dir, 'example_answer.oas')
 
 
 # This one need Technology working
-# def test_api():
-#     batch_main(layout_file, ymlfile=dataprep_file, outfile=outfile)
-#     run_xor(outfile, reffile)
+def test_api():
+    batch_main(layout_file, ymlfile=dataprep_file, outfile=outfile)
+    run_xor(outfile, reffile)
 
 
 def test_cm():
-    pass
-    # command = ['lymask']
-    # command += [layout_file]
-    # command += [dataprep_file]
-    # command += [outfile]
-    # subprocess.check_call(command)
-    # run_xor(outfile, reffile)
+    command = ['lymask']
+    command += [layout_file]
+    command += [dataprep_file]
+    command += [outfile]
+    subprocess.check_call(command)
+    run_xor(outfile, reffile)
 
