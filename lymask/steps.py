@@ -3,7 +3,7 @@ from lygadgets import pya, isGUI, message
 from functools import wraps
 
 from lymask.soen_utils import lys, LayerSet, insert_layer_tab
-from lymask.siepic_utils import get_layout_variables_no_tech
+from lymask.siepic_utils import gui_view
 from lymask.invocation import dpStep, filter_large_polygons, dbu, as_region
 
 
@@ -175,7 +175,7 @@ def mask_map(cell, clear_others=False, **kwargs):
         mask_layer_index += 1
     if isGUI():
         try:
-            lv, _, _ = get_layout_variables_no_tech()
+            lv = gui_view()
             add_tab = True
         except UserWarning:
             # No view is selected. We are probably in batch mode

@@ -1,6 +1,6 @@
 from __future__ import division, print_function, absolute_import
 from lygadgets import isGUI, pya, xml_to_dict
-from lymask.siepic_utils import tech_layer_properties, get_layout_variables_no_tech
+from lymask.siepic_utils import tech_layer_properties, gui_view
 
 
 class LayerSet(dict):
@@ -132,8 +132,6 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
     ''' Also updates lys, but if any of the layers are already there, it does nothing.
         If lyp_file is None, creates an empty layer list or does nothing if not in GUI mode.
     '''
-    lv, _, _ = get_layout_variables_no_tech()
-    i_new_tab = lv.num_layer_lists()
     if lyp_file is not None:
         try:
             lys.appendFile(lyp_file)
@@ -143,6 +141,8 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
             else:
                 raise
     if isGUI():
+        lv = gui_view()
+        i_new_tab = lv.num_layer_lists()
         lv.rename_layer_list(0, 'Designer')
         lv.insert_layer_list(i_new_tab)
         lv.current_layer_list = i_new_tab

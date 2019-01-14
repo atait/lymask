@@ -1,7 +1,7 @@
 from __future__ import division, print_function, absolute_import
 from lygadgets import pya, message
 import os
-from lymask.siepic_utils import get_layout_variables_no_tech, active_technology, tech_dataprep_layer_properties
+from lymask.siepic_utils import gui_view, gui_active_layout, active_technology, tech_dataprep_layer_properties
 from lymask.soen_utils import lys, insert_layer_tab
 from functools import wraps
 
@@ -63,16 +63,16 @@ def _main(layout, ymlfile):
 
 
 def gui_main(ymlfile=None):
-    lv, layout, _ = get_layout_variables_no_tech()
+    layout = gui_active_layout()
     lys.active_layout = layout
 
     insert_layer_tab(tech_dataprep_layer_properties(), tab_name='Dataprep')
 
-    lv.transaction('Mask Dataprep')
+    gui_view().transaction('Mask Dataprep')
     try:
         processed = _main(layout, ymlfile=ymlfile)
     finally:
-        lv.commit()
+        gui_view().commit()
 
 
 def batch_main(infile, ymlfile=None, outfile=None):
