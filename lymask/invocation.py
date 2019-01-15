@@ -32,12 +32,12 @@ def cm_main():
     batch_main(args.infile.name, ymlspec=args.ymlspec, outfile=args.outfile, technology=args.technology)
 
 
-def _main(layout, ymlfile, technology=None):
+def _main(layout, ymlfile, tech_obj=None):
     # todo: figure out which technology we will be using and its layer properties
     # todo: reload lys using technology
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
-    insert_layer_tab(tech_dataprep_layer_properties(technology), tab_name='Dataprep')
+    insert_layer_tab(tech_dataprep_layer_properties(tech_obj), tab_name='Dataprep')
     for func_info in step_list:
         func = all_func_dict[func_info[0]]
         try:
@@ -71,8 +71,10 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
     # Find the yml file
     if ymlspec is not None and os.path.exists(os.path.realpath(ymlspec)):
         ymlfile = ymlspec
+        if technology is not None:
+            set_active_technology(technology)
+        tech_obj = active_technology()
         if technology is None:
-            tech_obj = active_technology()
             message('Using the last used technology: {}'.format(tech_obj.name))
     else:
         if technology is None:
@@ -90,6 +92,6 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
             ymlfile = tech_obj.eff_path(os.path.join('dataprep', ymlspec))
     # Process it
     # lys.appendFile(tech_dataprep_layer_properties(tech_obj))
-    processed = _main(layout, ymlfile=ymlfile, technology=technology)
+    processed = _main(layout, ymlfile=ymlfile, tech_obj=tech_obj)
     # Write it
     processed.write(outfile)

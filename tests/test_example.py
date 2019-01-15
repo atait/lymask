@@ -20,10 +20,10 @@ def test_api():
     run_xor(outfile, reffile)
 
 
-# def test_from_technology():
-#     # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
-#     batch_main(layout_file, ymlspec='test', outfile=outfile, technology='example_tech')
-#     run_xor(outfile, reffile)
+def test_from_technology():
+    # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
+    batch_main(layout_file, ymlspec='test', outfile=outfile, technology='example_tech')
+    run_xor(outfile, reffile)
 
 
 # def test_cm():
