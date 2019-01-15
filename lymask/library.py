@@ -72,14 +72,3 @@ def fast_sized(input_region, xsize):
         tp.threads = _thread_count
         tp.execute('Sizing job')
         return output_region
-
-
-all_func_dict = {}
-def dpStep(step_fun):
-    ''' Each step must accept one argument that is cell, plus optionals, and not return
-
-        steps are added to all_steps *in the order they are defined*
-    '''
-    all_func_dict[step_fun.__name__] = step_fun
-    return step_fun
-

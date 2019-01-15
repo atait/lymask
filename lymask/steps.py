@@ -3,7 +3,17 @@ from functools import wraps
 from lygadgets import pya, isGUI, message, message_loud
 
 from lymask.utilities import lys, LayerSet, insert_layer_tab, gui_view
-from lymask.library import dpStep, dbu, as_region, fast_sized, fast_smoothed, set_threads
+from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads
+
+
+all_func_dict = {}
+def dpStep(step_fun):
+    ''' Each step must accept one argument that is cell, plus optionals, and not return
+
+        steps are added to all_steps *in the order they are defined*
+    '''
+    all_func_dict[step_fun.__name__] = step_fun
+    return step_fun
 
 
 @dpStep
@@ -99,7 +109,9 @@ def waveguide_sleeve(cell, Delta_nw_si=2.0, Delta=2.0, delta=0.2, do_photo=True)
     cell.shapes(lys.wg_full_ebeam).insert(ebeam_region)
     if do_photo:
         phoas_region = as_region(cell, 'FLOORPLAN') - fast_sized(wg_compressed, Delta - delta)
-        phoas_region -= as_region(cell, 'wg_deep_photo')
+        try:
+            phoas_region -= as_region(cell, 'wg_deep_photo')
+        except KeyError: pass
         cell.shapes(lys.wg_full_photo).insert(phoas_region)
 
 
@@ -112,7 +124,9 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100):
     for layname in ['wg_deep', 'wg_shallow', 'm1_nwpad',
                     'm4_ledpad', 'm3_res', 'm5_wiring', 'm2_nw',
                     'GP_KO']:
-        gp_exclusion_things += fast_smoothed(as_region(cell, layname))
+        try:
+            gp_exclusion_things += fast_smoothed(as_region(cell, layname))
+        except KeyError: pass
     # Where ground plane is explicitly connected to wires, cut it out of the exclusion region
     gnd_explicit = as_region(cell, 'm5_gnd')
     gp_exclusion_tight = gp_exclusion_things - fast_sized(gnd_explicit, Delta_gp)

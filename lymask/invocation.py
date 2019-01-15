@@ -12,6 +12,7 @@ from lymask.utilities import gui_view, gui_active_layout, \
                              active_technology, set_active_technology, \
                              tech_dataprep_layer_properties, \
                              lys, insert_layer_tab
+from lymask.steps import all_func_dict
 
 
 parser = argparse.ArgumentParser(description="Command line mask dataprep")
