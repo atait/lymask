@@ -1,94 +1,35 @@
+'''
+    Entry points from GUI, command line, and API
+'''
 from __future__ import division, print_function, absolute_import
 import os
 import yaml
-from functools import wraps
-
+import argparse
 from lygadgets import pya, message, Technology
-from lymask.soen_utils import gui_view, gui_active_layout, active_technology, set_active_technology, tech_dataprep_layer_properties
-from lymask.soen_utils import lys, insert_layer_tab
+
+from lymask import __version__
+from lymask.utilities import gui_view, gui_active_layout, \
+                             active_technology, set_active_technology, \
+                             tech_dataprep_layer_properties, \
+                             lys, insert_layer_tab
 
 
-### Helpers ###
+parser = argparse.ArgumentParser(description="Command line mask dataprep")
+parser.add_argument('infile', type=argparse.FileType('rb'),
+                    help='the input gds file')
+parser.add_argument('ymlspec', nargs='?', default=None,
+                    help='YML file that describes the dataprep steps and parameters. Can be relative to technology')
+parser.add_argument('-o', '--outfile', nargs='?', default=None,
+                    help='The output file. Default is to tack "_proc" onto the end')
+parser.add_argument('-t', '--technology', nargs='?', default=None,
+                    help='The name of technology to use. Must be visible in installed technologies')
+parser.add_argument('-v', '--version', action='version', version=f'%(prog)s v{__version__}')
 
-try:
-    dbu = active_technology().dbu
-except AttributeError:
-    dbu = .001
+def cm_main():
+    ''' This one uses the klayout standalone '''
+    args = parser.parse_args()
+    batch_main(args.infile.name, ymlspec=args.ymlspec, outfile=args.outfile, technology=args.technology)
 
-
-def as_region(cell, layname):
-    ''' Just a convenience brevity function '''
-    return pya.Region(cell.shapes(lys[layname]))
-
-
-def _normal_smoothed(unfiltered_region, deviation=0.1):
-    smoothed_region = unfiltered_region.dup()
-    smoothed_region.merged_semantics = False
-    smoothed_region.smooth(deviation / dbu)
-    return smoothed_region
-
-
-def fast_smoothed(unfiltered_region, deviation=0.1):
-    ''' Removes any points that would change the shape by less than this deviation.
-        This is used to significantly decrease the number of points prior to sizing
-
-        Note: multicore does not work well with this, but it turns out to be pretty fast
-    '''
-    # if something goes wrong, you can fall back to regular here by uncommenting
-    return _normal_smoothed(unfiltered_region, deviation)
-
-    temp_region = unfiltered_region.dup()
-    temp_region.merged_semantics = False
-
-    output_region = pya.Region()
-    tp = pya.TilingProcessor()
-    tp.input('in1', temp_region)
-    tp.output('out1', output_region)
-    tp.queue("_output(out1, in1.smoothed({}))".format(deviation / dbu))
-    tp.tile_size(2000., 2000.)
-    tp.tile_border(5 * deviation, 5 * deviation)
-    tp.threads = _thread_count
-    tp.execute('Smoothing job')
-    return output_region
-
-
-_thread_count = None
-def set_threads(thread_count):
-    ''' Set to None to disable parallel processing '''
-    global _thread_count
-    if thread_count == 1:
-        thread_count = None
-    _thread_count = thread_count
-
-
-def fast_sized(input_region, xsize):
-    # if something goes wrong, you can fall back to regular here by uncommenting
-    if _thread_count is None:
-        return input_region.sized(xsize)
-    else:
-        output_region = pya.Region()
-        tp = pya.TilingProcessor()
-        tp.input('in1', input_region)
-        tp.output('out1', output_region)
-        tp.queue("_output(out1, in1.sized({}))".format(xsize))
-        tp.tile_size(2000., 2000.)
-        tp.tile_border(2 * xsize, 2 * xsize)
-        tp.threads = _thread_count
-        tp.execute('Sizing job')
-        return output_region
-
-
-all_func_dict = {}
-def dpStep(step_fun):
-    ''' Each step must accept one argument that is cell, plus optionals, and not return
-
-        steps are added to all_steps *in the order they are defined*
-    '''
-    all_func_dict[step_fun.__name__] = step_fun
-    return step_fun
-
-
-### Entry points ###
 
 def _main(layout, ymlfile, technology=None):
     # todo: figure out which technology we will be using and its layer properties

@@ -28,7 +28,7 @@ except:
 else:
     lygadgets.message('Initializing lymask')
 
-from lymask.startup import registerMenuItems, reload_dataprep_menu
+from lymask.menu import registerMenuItems, reload_dataprep_menu
 registerMenuItems()
 reload_dataprep_menu()
 

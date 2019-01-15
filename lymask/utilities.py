@@ -167,7 +167,7 @@ def name2shortName(name_str):
 
         Reassign with::
 
-            soen.soen_utils.name2shortName = someOtherFunction
+            lymask.utilities.name2shortName = someOtherFunction
     '''
     if name_str is None:
         raise IOError('This layer has no name')
