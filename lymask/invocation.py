@@ -4,7 +4,7 @@ import yaml
 from functools import wraps
 
 from lygadgets import pya, message, Technology
-from lymask.siepic_utils import gui_view, gui_active_layout, active_technology, set_active_technology, tech_dataprep_layer_properties
+from lymask.soen_utils import gui_view, gui_active_layout, active_technology, set_active_technology, tech_dataprep_layer_properties
 from lymask.soen_utils import lys, insert_layer_tab
 
 
@@ -54,6 +54,7 @@ def _main(layout, ymlfile, technology=None):
     # todo: reload lys using technology
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
+    insert_layer_tab(tech_dataprep_layer_properties(technology), tab_name='Dataprep')
     for func_info in step_list:
         func = all_func_dict[func_info[0]]
         try:
@@ -69,8 +70,6 @@ def _main(layout, ymlfile, technology=None):
 def gui_main(ymlfile=None):
     layout = gui_active_layout()
     lys.active_layout = layout
-
-    insert_layer_tab(tech_dataprep_layer_properties(), tab_name='Dataprep')
 
     gui_view().transaction('Mask Dataprep')
     try:
@@ -107,7 +106,7 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
                 ymlspec += '.yml'
             ymlfile = tech_obj.eff_path(os.path.join('dataprep', ymlspec))
     # Process it
-    lys.appendFile(tech_dataprep_layer_properties(tech_obj))
+    # lys.appendFile(tech_dataprep_layer_properties(tech_obj))
     processed = _main(layout, ymlfile=ymlfile, technology=technology)
     # Write it
     processed.write(outfile)

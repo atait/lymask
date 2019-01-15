@@ -1,20 +1,22 @@
 from __future__ import division, print_function, absolute_import
-from lygadgets import isGUI, pya, xml_to_dict, Technology, klayout_last_open_technology
+from lygadgets import isGUI, pya, xml_to_dict
+from lygadgets.technology import Technology, klayout_last_open_technology
 
 
 #: This global variable to be deprecated
-_active_technology_name = klayout_last_open_technology()
+_active_technology = Technology.technology_by_name(klayout_last_open_technology())
 def active_technology():
-    return Technology.technology_by_name(_active_technology_name)
+    return _active_technology
 
 
 def set_active_technology(tech_name):
     if not Technology.has_technology(tech_name):
         raise ValueError('Technology not found. Available are {}'.format(Technology.technology_names()))
-    global _active_technology_name
-    _active_technology_name = tech_name
-    soen_utils.reload_lys()
+    global _active_technology
+    _active_technology = Technology.technology_by_name(tech_name)
+    reload_lys(tech_name)
 # end deprecation
+
 
 def tech_layer_properties(pya_tech=None):
     ''' Returns the file containing the main layer properties
@@ -158,10 +160,6 @@ class LayerSet(dict):
         other.active_layout = self.active_layout
         self.append(other)
 
-    def clear(self):
-        for layname in self.keys():
-            self.pop(layname)
-
 
 def name2shortName(name_str):
     ''' Good to have this function separate because
@@ -211,14 +209,16 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
             lv.rename_layer_list(i_new_tab, tab_name)
 
 
-lys = None
+lys = LayerSet()
 def reload_lys(technology=None):
     global lys
     lys.clear()
-    lys.appendFile(tech_layer_properties(technology))
+    try:
+        lyp_file = tech_layer_properties(Technology.technology_by_name(technology))
+        lys.appendFile(lyp_file)
+    except (FileNotFoundError, AttributeError):
+        print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
 
 
-try:
-    reload_lys()
-except (FileNotFoundError, AttributeError):
-    print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
+reload_lys()
+
