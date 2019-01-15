@@ -1,6 +1,8 @@
 import os, sys
 import subprocess
+os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
 
+import lymask
 from lymask import batch_main
 from lytest import run_xor
 
@@ -13,15 +15,31 @@ reffile = os.path.join(test_dir, 'example_answer.oas')
 
 # This one need Technology working
 def test_api():
-    batch_main(layout_file, ymlfile=dataprep_file, outfile=outfile)
+    # lymask.soen_utils.set_active_technology('example_tech')
+    batch_main(layout_file, ymlspec=dataprep_file, outfile=outfile)
     run_xor(outfile, reffile)
 
 
-def test_cm():
-    command = ['lymask']
-    command += [layout_file]
-    command += [dataprep_file]
-    command += [outfile]
-    subprocess.check_call(command)
-    run_xor(outfile, reffile)
+# def test_from_technology():
+#     # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
+#     batch_main(layout_file, ymlspec='test', outfile=outfile, technology='example_tech')
+#     run_xor(outfile, reffile)
+
+
+# def test_cm():
+#     command = ['lymask']
+#     command += [layout_file]
+#     command += [dataprep_file]
+#     command += ['-o', outfile]
+#     subprocess.check_call(command)
+#     run_xor(outfile, reffile)
+
+# def test_cm_from_tech():
+#     # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
+#     command = ['lymask']
+#     command += [layout_file]
+#     command += ['-o', outfile]
+#     command += ['-t', 'example_tech']
+#     subprocess.check_call(command)
+#     run_xor(outfile, reffile)
 
