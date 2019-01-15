@@ -1,5 +1,4 @@
-# Here is dataprep steps with parameters. It varies by subloop.
-# For now you just have to make temporary edits here to change the subloop.
+# Some typical dataprep commands
 ---
 -   - flatten
 -   - check_floorplan

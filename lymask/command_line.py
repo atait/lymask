@@ -12,7 +12,7 @@ parser.add_argument('infile', type=argparse.FileType('rb'),
                     help='the input gds file')
 parser.add_argument('ymlspec', nargs='?', default=None,
                     help='YML file that describes the dataprep steps and parameters. Can be relative to technology')
-parser.add_argument('outfile', nargs='?', default=None,
+parser.add_argument('-o', '--outfile', nargs='?', default=None,
                     help='The output file. Default is to tack "_proc" onto the end')
 parser.add_argument('-t', '--technology', nargs='?', default=None,
                     help='The name of technology to use. Must be visible in installed technologies')
