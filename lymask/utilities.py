@@ -1,5 +1,6 @@
 from __future__ import division, print_function, absolute_import
-from lygadgets import isGUI, pya, xml_to_dict
+from lygadgets import isGUI, pya
+import xmltodict
 from lygadgets.technology import Technology, klayout_last_open_technology
 
 
@@ -134,7 +135,8 @@ class LayerSet(dict):
     def fromFile(cls, filename):
         new_obj = cls()
         with open(filename, 'r') as fx:
-            all_layers = xml_to_dict(fx.read())['layer-properties']['properties']
+            lyp_dict = xmltodict.parse(fx.read(), process_namespaces=True)
+            all_layers = lyp_dict['layer-properties']['properties']
         for one_layer in all_layers:
             try:
                 group_members = one_layer['group-members']
