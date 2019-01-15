@@ -1,7 +1,62 @@
 from __future__ import division, print_function, absolute_import
-from lygadgets import isGUI, pya, xml_to_dict
-from lymask.siepic_utils import tech_layer_properties, gui_view
+from lygadgets import isGUI, pya, xml_to_dict, Technology, klayout_last_open_technology
 
+
+#: This global variable to be deprecated
+_active_technology_name = klayout_last_open_technology()
+def active_technology():
+    return Technology.technology_by_name(_active_technology_name)
+
+
+def set_active_technology(tech_name):
+    if not Technology.has_technology(tech_name):
+        raise ValueError('Technology not found. Available are {}'.format(Technology.technology_names()))
+    global _active_technology_name
+    _active_technology_name = tech_name
+    soen_utils.reload_lys()
+# end deprecation
+
+def tech_layer_properties(pya_tech=None):
+    ''' Returns the file containing the main layer properties
+    '''
+    if pya_tech is None:
+        pya_tech = active_technology()
+    return pya_tech.eff_path(pya_tech.eff_layer_properties_file())
+
+
+def tech_dataprep_layer_properties(pya_tech=None):
+    ''' Returns the file containing the main layer properties
+    '''
+    if pya_tech is None:
+        pya_tech = active_technology()
+    return pya_tech.eff_path('dataprep/klayout_layers_dataprep.lyp')
+
+
+def gui_view():
+    patch_environment()  # makes sure the Application attribute gets spoofed into the standalone
+    import pya
+    lv = pya.Application.instance().main_window().current_view()
+    if lv is None:
+        raise UserWarning("No view selected. Make sure you have an open layout.")
+    return lv
+
+
+def gui_active_layout():
+    ly = gui_view().active_cellview().layout()
+    if ly is None:
+        raise UserWarning("No layout. Make sure you have an open layout.")
+    return ly
+
+
+def gui_active_cell():
+    cell = gui_view().active_cellview().cell
+    if cell is None:
+        raise UserWarning("No cell. Make sure you have an open layout.")
+    return cell
+
+
+def gui_active_technology():
+    pass # todo
 
 class LayerSet(dict):
     ''' getitem returns the logical layer (integer) that can be used in pya functions,
@@ -103,6 +158,10 @@ class LayerSet(dict):
         other.active_layout = self.active_layout
         self.append(other)
 
+    def clear(self):
+        for layname in self.keys():
+            self.pop(layname)
+
 
 def name2shortName(name_str):
     ''' Good to have this function separate because
@@ -132,7 +191,7 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
     ''' Also updates lys, but if any of the layers are already there, it does nothing.
         If lyp_file is None, creates an empty layer list or does nothing if not in GUI mode.
     '''
-    if lyp_file is not None:
+    if lyp_file is not None and lys is not None:
         try:
             lys.appendFile(lyp_file)
         except ValueError as err:
@@ -152,9 +211,14 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
             lv.rename_layer_list(i_new_tab, tab_name)
 
 
-#: Load the layerset for OLMAC as the module variable "lys"
+lys = None
+def reload_lys(technology=None):
+    global lys
+    lys.clear()
+    lys.appendFile(tech_layer_properties(technology))
+
+
 try:
-    lys = LayerSet.fromFile(tech_layer_properties())
+    reload_lys()
 except (FileNotFoundError, AttributeError):
     print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
-    lys = None

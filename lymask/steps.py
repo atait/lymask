@@ -2,8 +2,7 @@ from __future__ import division, print_function, absolute_import
 from lygadgets import pya, isGUI, message
 from functools import wraps
 
-from lymask.soen_utils import lys, LayerSet, insert_layer_tab
-from lymask.siepic_utils import gui_view
+from lymask.soen_utils import lys, LayerSet, insert_layer_tab, gui_view
 from lymask.invocation import dpStep, filter_large_polygons, dbu, as_region
 
 
