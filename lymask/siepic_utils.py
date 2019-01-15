@@ -4,45 +4,41 @@ from __future__ import division, print_function, absolute_import
     Since we don't need very many they are rewritten to keep compatibility
 '''
 import pya
-from lygadgets.technology_patch import init_klayout_technologies, klayout_last_open_technology
+from lygadgets.technology import Technology, klayout_last_open_technology
 from lygadgets import patch_environment
 
 
-init_klayout_technologies()
+#: This global variable to be deprecated
 _active_technology_name = klayout_last_open_technology()
-
 def active_technology():
-    if pya is None:
-        return None
-    return pya.Technology.technology_by_name(_active_technology_name)
+    return Technology.technology_by_name(_active_technology_name)
 
 
 def set_active_technology(tech_name):
-    if tech_name not in pya.Technology.technology_names():
-        raise ValueError('Technology not found. Have you run "init_klayout_technologies"?')
+    if not Technology.has_technology(tech_name):
+        raise ValueError('Technology not found. Available are {}'.format(Technology.technology_names()))
     global _active_technology_name
     _active_technology_name = tech_name
+# end deprecation
 
-
-def tech_layer_properties():
+def tech_layer_properties(pya_tech=None):
     ''' Returns the file containing the main layer properties
     '''
-    pya_tech = active_technology()
+    if pya_tech is None:
+        pya_tech = active_technology()
     return pya_tech.eff_path(pya_tech.eff_layer_properties_file())
 
 
-def tech_dataprep_layer_properties():
+def tech_dataprep_layer_properties(pya_tech=None):
     ''' Returns the file containing the main layer properties
     '''
-    pya_tech = active_technology()
+    if pya_tech is None:
+        pya_tech = active_technology()
     return pya_tech.eff_path('dataprep/klayout_layers_dataprep.lyp')
 
 
-## Getting GUI layout variables
-## See https://github.com/lukasc-ubc/SiEPIC-Tools/blob/28deaa79533a9e213fcd664a50bc73a60e78fcbd/klayout_dot_config/python/SiEPIC/utils/__init__.py#L405
-
 def gui_view():
-    patch_environment()  # make sure the Application attribute gets into the standalone
+    patch_environment()  # makes sure the Application attribute gets spoofed into the standalone
     lv = pya.Application.instance().main_window().current_view()
     if lv is None:
         raise UserWarning("No view selected. Make sure you have an open layout.")

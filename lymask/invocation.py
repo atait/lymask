@@ -1,9 +1,11 @@
 from __future__ import division, print_function, absolute_import
-from lygadgets import pya, message
 import os
-from lymask.siepic_utils import gui_view, gui_active_layout, active_technology, tech_dataprep_layer_properties
-from lymask.soen_utils import lys, insert_layer_tab
+import yaml
 from functools import wraps
+
+from lygadgets import pya, message, Technology
+from lymask.siepic_utils import gui_view, gui_active_layout, active_technology, set_active_technology, tech_dataprep_layer_properties
+from lymask.soen_utils import lys, insert_layer_tab
 
 
 ### Helpers ###
@@ -46,8 +48,10 @@ def dpStep(step_fun):
 
 
 ### Entry points ###
-import yaml
-def _main(layout, ymlfile):
+
+def _main(layout, ymlfile, technology=None):
+    # todo: figure out which technology we will be using and its layer properties
+    # todo: reload lys using technology
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
     for func_info in step_list:
@@ -70,12 +74,12 @@ def gui_main(ymlfile=None):
 
     gui_view().transaction('Mask Dataprep')
     try:
-        processed = _main(layout, ymlfile=ymlfile)
+        processed = _main(layout, ymlfile=ymlfile, technology=None)  # todo: get the technology from the selection menu
     finally:
         gui_view().commit()
 
 
-def batch_main(infile, ymlfile=None, outfile=None):
+def batch_main(infile, ymlspec=None, technology=None, outfile=None):
     if outfile is None:
         outfile = infile[:-4] + '_proc.gds'
     # Load it
@@ -83,16 +87,27 @@ def batch_main(infile, ymlfile=None, outfile=None):
     layout.read(infile)
     lys.active_layout = layout
     # Find the yml file
-    if ymlfile is None:
-        # default dataprep test
-        ymlfile = active_technology().eff_path('dataprep/test.yml')
-    elif os.path.exists(os.path.realpath(ymlfile)):
-        pass
+    if ymlspec is not None and os.path.exists(os.path.realpath(ymlspec)):
+        ymlfile = ymlspec
+        if technology is None:
+            tech_obj = active_technology()
+            message('Using the last used technology: {}'.format(tech_obj.name))
     else:
-        # find path to tech
-        ymlfile = active_technology().eff_path(os.path.join('dataprep', ymlfile))
+        if technology is None:
+            raise ValueError('When specifying a relative dataprep file, you must also provide a technology.')
+
+        tech_obj = Technology.technology_by_name(technology)
+        set_active_technology(technology)
+        if ymlspec is None:
+            # default dataprep test
+            ymlfile = tech_obj.eff_path('dataprep/test.yml')
+        else:
+            # find path to tech
+            if not ymlspec.endswith('.yml'):
+                ymlspec += '.yml'
+            ymlfile = tech_obj.eff_path(os.path.join('dataprep', ymlspec))
     # Process it
-    lys.appendFile(tech_dataprep_layer_properties())
-    processed = _main(layout, ymlfile=ymlfile)
+    lys.appendFile(tech_dataprep_layer_properties(tech_obj))
+    processed = _main(layout, ymlfile=ymlfile, technology=technology)
     # Write it
     processed.write(outfile)
