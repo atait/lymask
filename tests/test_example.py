@@ -7,15 +7,15 @@ from lymask import batch_main
 from lytest import run_xor
 
 test_dir = os.path.dirname(__file__)
-dataprep_file = os.path.join(test_dir, 'example-dataprep.yml')
-layout_file = os.path.join(test_dir, 'example_src.oas')
-outfile = os.path.join(test_dir, 'example_run.oas')
-reffile = os.path.join(test_dir, 'example_answer.oas')
+dataprep_file = os.path.join(test_dir, 'tech', 'example_tech', 'dataprep', 'test.yml')
+layout_file = os.path.join(test_dir, '1_src.oas')
+outfile = os.path.join(test_dir, '1_run.oas')
+reffile = os.path.join(test_dir, '1_answer.oas')
 
 
 # This one need Technology working
 def test_api():
-    # lymask.soen_utils.set_active_technology('example_tech')
+    lymask.set_active_technology('example_tech')
     batch_main(layout_file, ymlspec=dataprep_file, outfile=outfile)
     run_xor(outfile, reffile)
 
