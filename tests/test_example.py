@@ -34,12 +34,12 @@ def test_from_technology():
 #     subprocess.check_call(command)
 #     run_xor(outfile, reffile)
 
-# def test_cm_from_tech():
-#     # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
-#     command = ['lymask']
-#     command += [layout_file]
-#     command += ['-o', outfile]
-#     command += ['-t', 'example_tech']
-#     subprocess.check_call(command)
-#     run_xor(outfile, reffile)
+def test_cm_from_tech():
+    # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
+    command = ['lymask']
+    command += [layout_file]
+    command += ['-o', outfile]
+    command += ['-t', 'example_tech']
+    subprocess.check_call(command)
+    run_xor(outfile, reffile)
 
