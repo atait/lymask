@@ -1,7 +1,64 @@
 from __future__ import division, print_function, absolute_import
-from lygadgets import isGUI, pya, xml_to_dict
-from lymask.siepic_utils import tech_layer_properties, get_layout_variables_no_tech
+from lygadgets import isGUI, pya, lyp_to_layerlist
+from lygadgets.technology import Technology, klayout_last_open_technology
 
+
+#: This global variable to be deprecated
+_active_technology = Technology.technology_by_name(klayout_last_open_technology())
+def active_technology():
+    return _active_technology
+
+
+def set_active_technology(tech_name):
+    if not Technology.has_technology(tech_name):
+        raise ValueError('Technology not found. Available are {}'.format(Technology.technology_names()))
+    global _active_technology
+    _active_technology = Technology.technology_by_name(tech_name)
+    reload_lys(tech_name)
+# end deprecation
+
+
+def tech_layer_properties(pya_tech=None):
+    ''' Returns the file containing the main layer properties
+    '''
+    if pya_tech is None:
+        pya_tech = active_technology()
+    return pya_tech.eff_path(pya_tech.eff_layer_properties_file())
+
+
+def tech_dataprep_layer_properties(pya_tech=None):
+    ''' Returns the file containing the main layer properties
+    '''
+    if pya_tech is None:
+        pya_tech = active_technology()
+    return pya_tech.eff_path('dataprep/klayout_layers_dataprep.lyp')
+
+
+def gui_view():
+    patch_environment()  # makes sure the Application attribute gets spoofed into the standalone
+    import pya
+    lv = pya.Application.instance().main_window().current_view()
+    if lv is None:
+        raise UserWarning("No view selected. Make sure you have an open layout.")
+    return lv
+
+
+def gui_active_layout():
+    ly = gui_view().active_cellview().layout()
+    if ly is None:
+        raise UserWarning("No layout. Make sure you have an open layout.")
+    return ly
+
+
+def gui_active_cell():
+    cell = gui_view().active_cellview().cell
+    if cell is None:
+        raise UserWarning("No cell. Make sure you have an open layout.")
+    return cell
+
+
+def gui_active_technology():
+    pass # todo
 
 class LayerSet(dict):
     ''' getitem returns the logical layer (integer) that can be used in pya functions,
@@ -76,8 +133,7 @@ class LayerSet(dict):
     @classmethod
     def fromFile(cls, filename):
         new_obj = cls()
-        with open(filename, 'r') as fx:
-            all_layers = xml_to_dict(fx.read())['layer-properties']['properties']
+        all_layers = lyp_to_layerlist(filename)
         for one_layer in all_layers:
             try:
                 group_members = one_layer['group-members']
@@ -110,7 +166,7 @@ def name2shortName(name_str):
 
         Reassign with::
 
-            soen.soen_utils.name2shortName = someOtherFunction
+            lymask.utilities.name2shortName = someOtherFunction
     '''
     if name_str is None:
         raise IOError('This layer has no name')
@@ -132,9 +188,7 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
     ''' Also updates lys, but if any of the layers are already there, it does nothing.
         If lyp_file is None, creates an empty layer list or does nothing if not in GUI mode.
     '''
-    lv, _, _ = get_layout_variables_no_tech()
-    i_new_tab = lv.num_layer_lists()
-    if lyp_file is not None:
+    if lyp_file is not None and lys is not None:
         try:
             lys.appendFile(lyp_file)
         except ValueError as err:
@@ -143,6 +197,8 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
             else:
                 raise
     if isGUI():
+        lv = gui_view()
+        i_new_tab = lv.num_layer_lists()
         lv.rename_layer_list(0, 'Designer')
         lv.insert_layer_list(i_new_tab)
         lv.current_layer_list = i_new_tab
@@ -152,9 +208,16 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
             lv.rename_layer_list(i_new_tab, tab_name)
 
 
-#: Load the layerset for OLMAC as the module variable "lys"
-try:
-    lys = LayerSet.fromFile(tech_layer_properties())
-except (FileNotFoundError, AttributeError):
-    print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
-    lys = None
+lys = LayerSet()
+def reload_lys(technology=None):
+    global lys
+    lys.clear()
+    try:
+        lyp_file = tech_layer_properties(Technology.technology_by_name(technology))
+        lys.appendFile(lyp_file)
+    except (FileNotFoundError, AttributeError):
+        print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
+
+
+reload_lys()
+

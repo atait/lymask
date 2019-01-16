@@ -1,10 +1,19 @@
 from __future__ import division, print_function, absolute_import
-from lygadgets import pya, isGUI, message
 from functools import wraps
+from lygadgets import pya, isGUI, message, message_loud
 
-from lymask.soen_utils import lys, LayerSet, insert_layer_tab
-from lymask.siepic_utils import get_layout_variables_no_tech
-from lymask.invocation import dpStep, filter_large_polygons, dbu, as_region
+from lymask.utilities import lys, LayerSet, insert_layer_tab, gui_view
+from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads
+
+
+all_func_dict = {}
+def dpStep(step_fun):
+    ''' Each step must accept one argument that is cell, plus optionals, and not return
+
+        steps are added to all_steps *in the order they are defined*
+    '''
+    all_func_dict[step_fun.__name__] = step_fun
+    return step_fun
 
 
 @dpStep
@@ -55,17 +64,24 @@ def erase_text_and_other_junk(cell):
 
 
 @dpStep
+def processor(cell, thread_count=1, remote_host=None):
+    if remote_host is not None:
+        message_loud('Automatic remote hosting is not yet supported')
+    set_threads(thread_count)
+
+
+@dpStep
 def nanowire_sleeve(cell, Delta=2.5, delta=0.2, do_photo=True):
     Delta /= dbu
     delta /= dbu  # new naming convention?
     for dp_lay in ['m2_nw_photo', 'm2_nw_ebeam']:
         cell.clear(lys[dp_lay])
     nw_region = as_region(cell, 'm2_nw')
-    nw_compressed = filter_large_polygons(nw_region)
-    ebeam_region = nw_compressed.sized(Delta + delta) - nw_region
+    nw_compressed = fast_smoothed(nw_region)
+    ebeam_region = fast_sized(nw_compressed, Delta + delta) - nw_region
     cell.shapes(lys.m2_nw_ebeam).insert(ebeam_region)
     if do_photo:
-        phoas_region = as_region(cell, 'FLOORPLAN') - nw_compressed.sized(Delta - delta)
+        phoas_region = as_region(cell, 'FLOORPLAN') - fast_sized(nw_compressed, Delta - delta)
         cell.shapes(lys.m2_nw_photo).insert(phoas_region)
 
 
@@ -81,25 +97,26 @@ def waveguide_sleeve(cell, Delta_nw_si=2.0, Delta=2.0, delta=0.2, do_photo=True)
         cell.clear(lys[dp_lay])
 
     # add silicon under the nanowires
-    nw_compressed = filter_large_polygons(as_region(cell, 'm2_nw'))
+    nw_compressed = fast_smoothed(as_region(cell, 'm2_nw'))
     wg_explicit = as_region(cell, 'wg_deep')
-    nw_except_on_wg = nw_compressed - wg_explicit.sized(Delta_nw_si)
-    wg_all = nw_except_on_wg.sized(Delta_nw_si) + wg_explicit
+    nw_except_on_wg = nw_compressed - fast_sized(wg_explicit, Delta_nw_si)
+    wg_all = fast_sized(nw_except_on_wg, Delta_nw_si) + wg_explicit
 
     # do the bulk-sleeve
     # wg_compressed = filter_large_polygons(wg_all)
-    wg_compressed = wg_all.dup()
-    wg_compressed.merged_semantics = False
-    wg_compressed.smooth(.1 / dbu)
-    ebeam_region = wg_compressed.sized(Delta + delta) - wg_all
+    wg_compressed = fast_smoothed(wg_all)
+    ebeam_region = fast_sized(wg_compressed, Delta + delta) - wg_all
     cell.shapes(lys.wg_full_ebeam).insert(ebeam_region)
     if do_photo:
-        phoas_region = as_region(cell, 'FLOORPLAN') - wg_compressed.sized(Delta - delta)
+        phoas_region = as_region(cell, 'FLOORPLAN') - fast_sized(wg_compressed, Delta - delta)
+        try:
+            phoas_region -= as_region(cell, 'wg_deep_photo')
+        except KeyError: pass
         cell.shapes(lys.wg_full_photo).insert(phoas_region)
 
 
 @dpStep
-def ground_plane(cell, Delta_gp=15.0):
+def ground_plane(cell, Delta_gp=15.0, points_per_circle=100):
     Delta_gp /= dbu
     cell.clear(lys.gp_photo)
     # Accumulate everything that we don't want to cover in metal
@@ -107,19 +124,19 @@ def ground_plane(cell, Delta_gp=15.0):
     for layname in ['wg_deep', 'wg_shallow', 'm1_nwpad',
                     'm4_ledpad', 'm3_res', 'm5_wiring', 'm2_nw',
                     'GP_KO']:
-        reg = as_region(cell, layname)
-        reg.merged_semantics = False
-        gp_exclusion_things += reg.smoothed(.1 / dbu)
+        try:
+            gp_exclusion_things += fast_smoothed(as_region(cell, layname))
+        except KeyError: pass
     # Where ground plane is explicitly connected to wires, cut it out of the exclusion region
     gnd_explicit = as_region(cell, 'm5_gnd')
-    gp_exclusion_tight = gp_exclusion_things - gnd_explicit.sized(Delta_gp)
+    gp_exclusion_tight = gp_exclusion_things - fast_sized(gnd_explicit, Delta_gp)
     # Inflate the buffer around excluded things and pour
-    gp_exclusion_zone = gp_exclusion_tight.size(Delta_gp)
+    gp_exclusion_zone = fast_sized(gp_exclusion_tight, Delta_gp)
     gp_region = as_region(cell, 'FLOORPLAN') - gp_exclusion_zone
 
     # Connect to pads
     gp_region.merge()
-    gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, 100)
+    gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
     gp_region += as_region(cell, 'm5_gnd')
     gp_region.merge()
     cell.shapes(lys.gp_photo).insert(gp_region)
@@ -175,23 +192,23 @@ def mask_map(cell, clear_others=False, **kwargs):
         mask_layer_index += 1
     if isGUI():
         try:
-            lv, _, _ = get_layout_variables_no_tech()
+            lv = gui_view()
             add_tab = True
         except UserWarning:
-            # No view is selected. We are probably in batch mode
+            # No view is selected. We might be in batch mode
             add_tab = False
-    if add_tab:
-        if lv.is_transacting():
-            lv.commit()
-            lv.transaction('Adding mask layers')
-        insert_layer_tab(tab_name='Masks')
-        for dest_layer in kwargs.keys():
-            lay_prop = pya.LayerProperties()
-            lay_prop.source_name = lys.get_as_LayerInfo(dest_layer).name
-            lay_prop.source_layer = lys.get_as_LayerInfo(dest_layer).layer
-            lay_prop.source_datatype = lys.get_as_LayerInfo(dest_layer).datatype
-            lv.init_layer_properties(lay_prop)
-            lv.insert_layer(lv.end_layers(), lay_prop)
+        if add_tab:
+            if lv.is_transacting():
+                lv.commit()
+                lv.transaction('Adding mask layers')
+            insert_layer_tab(tab_name='Masks')
+            for dest_layer in kwargs.keys():
+                lay_prop = pya.LayerProperties()
+                lay_prop.source_name = lys.get_as_LayerInfo(dest_layer).name
+                lay_prop.source_layer = lys.get_as_LayerInfo(dest_layer).layer
+                lay_prop.source_datatype = lys.get_as_LayerInfo(dest_layer).datatype
+                lv.init_layer_properties(lay_prop)
+                lv.insert_layer(lv.end_layers(), lay_prop)
     if clear_others:
         for any_layer in lys.keys():
             if any_layer not in kwargs.keys():
