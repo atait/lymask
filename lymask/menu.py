@@ -4,8 +4,7 @@ import glob
 import os
 
 from lymask.invocation import gui_main
-from lymask.utilities import insert_layer_tab
-from lymask.siepic_utils import tech_dataprep_layer_properties
+from lymask.utilities import insert_layer_tab, tech_dataprep_layer_properties
 
 DEFAULT_TECH = 'OLMAC'
 
