@@ -1,4 +1,4 @@
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 from lymask.utilities import active_technology, set_active_technology
 from lymask.invocation import batch_main
