@@ -7,7 +7,7 @@ from lymask import batch_main
 from lytest import run_xor
 
 test_dir = os.path.dirname(__file__)
-dataprep_file = os.path.join(test_dir, 'tech', 'example_tech', 'dataprep', 'test.yml')
+dataprep_file = os.path.join(test_dir, 'tech', 'example_tech', 'dataprep', 'default.yml')
 layout_file = os.path.join(test_dir, '1_src.oas')
 outfile = os.path.join(test_dir, '1_run.oas')
 reffile = os.path.join(test_dir, '1_answer.oas')
@@ -22,7 +22,7 @@ def test_api():
 
 def test_from_technology():
     # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
-    batch_main(layout_file, ymlspec='test', outfile=outfile, technology='example_tech')
+    batch_main(layout_file, ymlspec='default', outfile=outfile, technology='example_tech')
     run_xor(outfile, reffile)
 
 

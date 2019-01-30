@@ -51,7 +51,7 @@ def dataprep_yml_to_menu(dataprep_file):
     subloop_name = os.path.splitext(os.path.basename(dataprep_file))[0]
     action = _gen_dataprep_action(dataprep_file)
     action.title = 'Run {}.yml'.format(subloop_name)
-    if subloop_name == 'test':
+    if subloop_name == 'default':
         action.shortcut = 'Shift+Ctrl+P'
         menu.insert_separator('tools_menu.dataprep.begin', 'SEP')
         menu.insert_item('tools_menu.dataprep.begin', subloop_name, action)

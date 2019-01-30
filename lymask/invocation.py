@@ -84,7 +84,7 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
         set_active_technology(technology)
         if ymlspec is None:
             # default dataprep test
-            ymlfile = tech_obj.eff_path('dataprep/test.yml')
+            ymlfile = tech_obj.eff_path('dataprep/default.yml')
         else:
             # find path to tech
             if not ymlspec.endswith('.yml'):
