@@ -62,6 +62,7 @@ def gui_main(ymlfile=None):
 
 
 def batch_main(infile, ymlspec=None, technology=None, outfile=None):
+    # covers everything that is not GUI
     if outfile is None:
         outfile = infile[:-4] + '_proc.gds'
     # Load it
