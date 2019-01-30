@@ -35,6 +35,7 @@ def test_from_technology():
 #     run_xor(outfile, reffile)
 
 def test_cm_from_tech():
+    # this also checks that it defaults to default.yml
     # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
     command = ['lymask']
     command += [layout_file]
