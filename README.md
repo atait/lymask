@@ -4,7 +4,7 @@
 
 Mask dataprep with klayout.
 
-Converts designer layouts to mask layouts that go to lithography machines.
+Converts designer layouts to mask layouts that go to the lithography machines.
 
 
 ## Installation
