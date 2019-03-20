@@ -1,5 +1,5 @@
 from __future__ import division, print_function, absolute_import
-from lygadgets import isGUI, pya, lyp_to_layerlist
+from lygadgets import isGUI, pya, lyp_to_layerlist, patch_environment
 from lygadgets.technology import Technology, klayout_last_open_technology
 
 
