@@ -198,9 +198,9 @@ def mask_map(cell, clear_others=False, **kwargs):
             # No view is selected. We might be in batch mode
             add_tab = False
         if add_tab:
-            if lv.is_transacting():
-                lv.commit()
-                lv.transaction('Adding mask layers')
+            # if lv.is_transacting():
+            #     lv.commit()
+            #     lv.transaction('Adding mask layers')
             insert_layer_tab(tab_name='Masks')
             for dest_layer in kwargs.keys():
                 lay_prop = pya.LayerProperties()

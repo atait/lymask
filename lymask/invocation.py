@@ -10,7 +10,7 @@ from lygadgets import pya, message, Technology
 from lymask import __version__
 from lymask.utilities import gui_view, gui_active_layout, \
                              active_technology, set_active_technology, \
-                             tech_dataprep_layer_properties, \
+                             tech_layer_properties, tech_dataprep_layer_properties, \
                              lys, insert_layer_tab
 from lymask.steps import all_func_dict
 
@@ -37,6 +37,8 @@ def _main(layout, ymlfile, tech_obj=None):
     # todo: reload lys using technology
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
+    lys.clear()
+    lys.appendFile(tech_layer_properties(tech_obj))
     insert_layer_tab(tech_dataprep_layer_properties(tech_obj), tab_name='Dataprep')
     for func_info in step_list:
         func = all_func_dict[func_info[0]]
@@ -53,12 +55,15 @@ def _main(layout, ymlfile, tech_obj=None):
 def gui_main(ymlfile=None):
     layout = gui_active_layout()
     lys.active_layout = layout
+    technology = gui_view().active_cellview().technology  # gets the technology from the selection menu
+    tech_obj = Technology.technology_by_name(technology)
 
-    gui_view().transaction('Mask Dataprep')
+    # gui_view().transaction('Mask Dataprep')
     try:
-        processed = _main(layout, ymlfile=ymlfile, technology=None)  # todo: get the technology from the selection menu
+        processed = _main(layout, ymlfile=ymlfile, tech_obj=tech_obj)
     finally:
-        gui_view().commit()
+        pass
+        # gui_view().commit()
 
 
 def batch_main(infile, ymlspec=None, technology=None, outfile=None):
@@ -71,6 +76,7 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
     lys.active_layout = layout
     # Find the yml file
     if ymlspec is not None and os.path.exists(os.path.realpath(ymlspec)):
+        # Option 1: file path is specified
         ymlfile = ymlspec
         if technology is not None:
             set_active_technology(technology)
@@ -78,6 +84,7 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
         if technology is None:
             message('Using the last used technology: {}'.format(tech_obj.name))
     else:
+        # Option 2: search within a specified technology
         if technology is None:
             raise ValueError('When specifying a relative dataprep file, you must also provide a technology.')
 

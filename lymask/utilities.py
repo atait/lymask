@@ -210,7 +210,6 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
 
 lys = LayerSet()
 def reload_lys(technology=None):
-    global lys
     lys.clear()
     try:
         lyp_file = tech_layer_properties(Technology.technology_by_name(technology))
@@ -219,5 +218,5 @@ def reload_lys(technology=None):
         print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
 
 
-reload_lys()
+# reload_lys()
 
