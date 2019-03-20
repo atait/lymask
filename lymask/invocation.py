@@ -58,12 +58,11 @@ def gui_main(ymlfile=None):
     technology = gui_view().active_cellview().technology  # gets the technology from the selection menu
     tech_obj = Technology.technology_by_name(technology)
 
-    # gui_view().transaction('Mask Dataprep')
+    gui_view().transaction('Mask Dataprep')
     try:
         processed = _main(layout, ymlfile=ymlfile, tech_obj=tech_obj)
     finally:
-        pass
-        # gui_view().commit()
+        gui_view().commit()
 
 
 def batch_main(infile, ymlspec=None, technology=None, outfile=None):

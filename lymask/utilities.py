@@ -203,7 +203,10 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
         lv.insert_layer_list(i_new_tab)
         lv.current_layer_list = i_new_tab
         if lyp_file is not None:
+            was_transacting = lv.is_transacting()
+            if was_transacting: lv.commit()
             lv.load_layer_props(lyp_file)
+            if was_transacting: lv.transaction('Bump transaction')
         if tab_name is not None:
             lv.rename_layer_list(i_new_tab, tab_name)
 
