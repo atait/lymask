@@ -213,8 +213,21 @@ def mask_map(cell, clear_others=False, **kwargs):
                 lv.insert_layer(lv.end_layers(), lay_prop)
     if clear_others:
         for any_layer in lys.keys():
-            if any_layer not in kwargs.keys():
+            if any_layer not in kwargs.keys() and any_layer != 'FLOORPLAN':
                 cell.clear(lys[any_layer])
+
+
+@dpStep
+def clear_nonmask(cell):
+    ''' Gets rid of everything except 101--199. That is what we have decided are mask layers.
+        Same as clear_others in mask_map
+    '''
+    for any_layer in lys.keys():
+        lay = lys[any_layer].gds_layer
+        is_mask = 100 < lay and lay < 200
+        if not is_mask:
+            cell.clear(lys[any_layer])
+
 
 
 @dpStep
