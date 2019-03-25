@@ -188,7 +188,12 @@ def mask_map(cell, clear_others=False, **kwargs):
         cell.layout().layer(new_layinfo)
         components = src_expression.split('+')
         for comp in components:
-            cell.copy(lys[comp.strip()], lys[dest_layer])
+            try:
+                comp_lay_info = lys[comp.strip()]
+            except KeyError as err:
+                message_loud('Source layer [{}] not found in existing designer or dataprep layerset.'.format(comp))
+                raise
+            cell.copy(comp_lay_info, lys[dest_layer])
         mask_layer_index += 1
     if isGUI():
         try:
