@@ -89,6 +89,7 @@ def nanowire_sleeve(cell, Delta=2.5, delta=0.2, do_photo=True):
 def waveguide_sleeve(cell, Delta_nw_si=2.0, Delta=2.0, delta=0.2, do_photo=True):
     ''' Does a bulk-sleeve for waveguide full, but first adds it under nanowires.
         Endcaps end where the explicit waveguide ends.
+        Recognizes the wg_deep_photo layer as a photolith-only layer (lower resolution, faster EBeam write)
     '''
     Delta_nw_si /= dbu
     Delta /= dbu

@@ -13,8 +13,14 @@ except AttributeError:
 
 
 def as_region(cell, layname):
-    ''' Just a convenience brevity function '''
-    return pya.Region(cell.shapes(lys[layname]))
+    ''' Mostly a convenience brevity function.
+        If a layer isn't in the layer set, return an empty region instead of crashing
+    '''
+    try:
+        return pya.Region(cell.shapes(lys[layname]))
+    except KeyError:
+        return pya.Region()
+
 
 
 def _normal_smoothed(unfiltered_region, deviation=0.1):
