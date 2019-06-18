@@ -10,9 +10,13 @@ DEFAULT_TECH = 'OLMAC'
 
 def registerMenuItems():
     menu = pya.Application.instance().main_window().menu()
-    s1 = "tools_menu.dataprep_menu"
+    s0 = "soen_menu"
+    if not(menu.is_menu(s0)):
+        menu.insert_menu('macros_menu', s0, 'SOEN PDK')
+
+    s1 = "soen_menu.dataprep_menu"
     if not menu.is_menu(s1):
-        menu.insert_menu('tools_menu.end', 'dataprep', 'Mask Dataprep')
+        menu.insert_menu('soen_menu.end', 'dataprep', 'Mask Dataprep')
 
 
 global item_counter
@@ -53,10 +57,10 @@ def dataprep_yml_to_menu(dataprep_file):
     action.title = 'Run {}.yml'.format(subloop_name)
     if subloop_name == 'default':
         action.shortcut = 'Shift+Ctrl+P'
-        menu.insert_separator('tools_menu.dataprep.begin', 'SEP')
-        menu.insert_item('tools_menu.dataprep.begin', subloop_name, action)
+        menu.insert_separator('soen_menu.dataprep.begin', 'SEP')
+        menu.insert_item('soen_menu.dataprep.begin', subloop_name, action)
     else:
-        menu.insert_item('tools_menu.dataprep.end', subloop_name, action)
+        menu.insert_item('soen_menu.dataprep.end', subloop_name, action)
 
 
 def reload_dataprep_menu(tech_name=None):
@@ -74,5 +78,5 @@ def reload_dataprep_menu(tech_name=None):
     layer_action = _gen_new_action(refresh_layers)
     layer_action.title = 'Refresh layer display'
     # layer_action.shortcut = 'Shift+Ctrl+P'
-    menu.insert_separator('tools_menu.dataprep.begin', 'SEP2')
-    menu.insert_item('tools_menu.dataprep.begin', 'dataprep_layer_refresh', layer_action)
+    menu.insert_separator('soen_menu.dataprep.begin', 'SEP2')
+    menu.insert_item('soen_menu.dataprep.begin', 'dataprep_layer_refresh', layer_action)
