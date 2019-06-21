@@ -23,12 +23,6 @@ def test_api():
     run_xor(outfile, reffile)
 
 
-def test_from_technology():
-    # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
-    batch_main(layout_file, ymlspec='default', outfile=outfile, technology='example_tech')
-    run_xor(outfile, reffile)
-
-
 def test_lyp_loading():
     from lymask.utilities import set_active_technology, reload_lys, lys
     layout = pya.Layout()
@@ -42,6 +36,12 @@ def test_lyp_loading():
 
     with pytest.raises(KeyError):
         batch_main(layout_file, ymlspec='bad_masks', technology='example_tech')
+
+
+def test_from_technology():
+    # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
+    batch_main(layout_file, ymlspec='default', outfile=outfile, technology='example_tech')
+    run_xor(outfile, reffile)
 
 
 def test_cm_from_tech():

@@ -183,12 +183,17 @@ def mask_map(cell, clear_others=False, **kwargs):
 
         There is a problem if you have 101 defined in your file and then another layer that is not defined.
     '''
-    mask_layer_index = 101
     assert_valid_mask_map(kwargs)
+    # If we need to make new layers,
+    new_mask_index = 0
+    available_mask_layers = list(range(100, 200))
+    for occupied_layer in lys.values():
+        if occupied_layer.layer in available_mask_layers:
+            available_mask_layers.remove(occupied_layer.layer)
     # merging and moving to new layers
     for dest_layer, src_expression in kwargs.items():
         if not dest_layer in lys.keys():
-            new_layinfo = pya.LayerInfo(mask_layer_index, 0, dest_layer)
+            new_layinfo = pya.LayerInfo(available_mask_layers[new_mask_index], 0, dest_layer)
             lys[dest_layer] = new_layinfo
             cell.layout().layer(new_layinfo)
 
@@ -196,7 +201,7 @@ def mask_map(cell, clear_others=False, **kwargs):
         for comp in components:
             comp_lay_info = lys[comp.strip()]
             cell.copy(comp_lay_info, lys[dest_layer])
-        mask_layer_index += 1
+        new_mask_index += 1
 
     if clear_others:
         for any_layer in lys.keys():
