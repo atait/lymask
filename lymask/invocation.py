@@ -10,8 +10,8 @@ from lygadgets import pya, message, Technology
 from lymask import __version__
 from lymask.utilities import gui_view, gui_active_layout, \
                              active_technology, set_active_technology, \
-                             tech_layer_properties, tech_dataprep_layer_properties, \
-                             lys, load_dataprep_layers
+                             tech_layer_properties, \
+                             lys, reload_lys
 from lymask.steps import all_func_dict
 
 
@@ -37,7 +37,7 @@ def _main(layout, ymlfile, tech_obj=None):
     # todo: reload lys using technology
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
-    load_dataprep_layers(tech_obj)
+    reload_lys(tech_obj, dataprep=True)
     for func_info in step_list:
         func = all_func_dict[func_info[0]]
         try:
@@ -96,7 +96,6 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
                 ymlspec += '.yml'
             ymlfile = tech_obj.eff_path(os.path.join('dataprep', ymlspec))
     # Process it
-    # lys.appendFile(tech_dataprep_layer_properties(tech_obj))
     processed = _main(layout, ymlfile=ymlfile, tech_obj=tech_obj)
     # Write it
     processed.write(outfile)

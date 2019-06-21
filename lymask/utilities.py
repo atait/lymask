@@ -185,58 +185,33 @@ def source2pyaLayerInfo(source_str):
     return pya.LayerInfo(int(layer), int(datatype))
 
 
-def load_dataprep_layers(technology=None):
-    ''' Also updates lys, but if any of the layers are already there, it does nothing.
-        If lyp_file is None, creates an empty layer list or does nothing if not in GUI mode.
+lys = LayerSet()
+def reload_lys(technology=None, clear=False, dataprep=False):
+    ''' Updates lys from the lyp files. Also updates the layer display in GUI mode.
+        If any of the layers are already there, it does nothing.
+        If no lyp is found, does nothing
     '''
     if technology is None:
         technology = active_technology()
-    reload_lys(technology, dataprep=True)
+    if isinstance(technology, str):
+        technology = Technology.technology_by_name(technology)
+
+    if clear: lys.clear()
+    try:
+        lyp_file = tech_layer_properties(technology) if not dataprep else tech_dataprep_layer_properties(technology)
+        lys.appendFile(lyp_file, doubles_ok=True)
+    except (FileNotFoundError, AttributeError):
+        print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
+
     if isGUI():
         lv = gui_view()
         was_transacting = lv.is_transacting()
         if was_transacting:
             lv.commit()
-        lv.load_layer_props(tech_dataprep_layer_properties(technology))
+        lv.load_layer_props(lyp_file)
         if was_transacting:
             lv.transaction('Bump transaction')
         lv.current_layer_list = 0
-
-
-def insert_layer_tab(lyp_file=None, tab_name=None):
-    if lyp_file is not None and lys is not None:
-        try:
-            lys.appendFile(lyp_file)
-        except ValueError as err:
-            if 'doubly defined' in err.args[0]:
-                return
-            else:
-                raise
-    if isGUI():
-        lv = gui_view()
-        i_new_tab = lv.num_layer_lists()
-        lv.rename_layer_list(0, 'Designer')
-        lv.insert_layer_list(i_new_tab)
-        lv.current_layer_list = i_new_tab
-        if lyp_file is not None:
-            was_transacting = lv.is_transacting()
-            if was_transacting: lv.commit()
-            lv.load_layer_props(lyp_file)
-            if was_transacting: lv.transaction('Bump transaction')
-        if tab_name is not None:
-            lv.rename_layer_list(i_new_tab, tab_name)
-
-
-lys = LayerSet()
-def reload_lys(technology=None, clear=False, dataprep=False):
-    if isinstance(technology, str):
-        technology = Technology.technology_by_name(technology)
-    try:
-        lyp_file = tech_layer_properties(technology) if not dataprep else tech_dataprep_layer_properties(technology)
-    except (FileNotFoundError, AttributeError):
-        print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
-    if clear: lys.clear()
-    lys.appendFile(lyp_file, doubles_ok=True)
 
 
 # reload_lys()

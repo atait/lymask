@@ -2,7 +2,7 @@ from __future__ import division, print_function, absolute_import
 from functools import wraps
 from lygadgets import pya, isGUI, message, message_loud
 
-from lymask.utilities import lys, LayerSet, insert_layer_tab, gui_view
+from lymask.utilities import lys, LayerSet, gui_view
 from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads
 
 

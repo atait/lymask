@@ -4,7 +4,7 @@ import glob
 import os
 
 from lymask.invocation import gui_main
-from lymask.utilities import load_dataprep_layers, tech_dataprep_layer_properties
+from lymask.utilities import reload_lys
 
 DEFAULT_TECH = 'OLMAC'
 
@@ -71,7 +71,7 @@ def reload_dataprep_menu(tech_name=None):
         dataprep_yml_to_menu(dataprep_file)
     # Now put in the layers refresh
     menu = pya.Application.instance().main_window().menu()
-    layer_action = _gen_new_action(load_dataprep_layers)
+    layer_action = _gen_new_action(lambda *args: reload_lys(*args, dataprep=True))
     layer_action.title = 'Refresh layer display'
     layer_action.shortcut = 'Shift+Ctrl+P'
     menu.insert_separator('soen_menu.dataprep.begin', 'SEP2')
