@@ -1,0 +1,9 @@
+# One of the source layers in mask map does not exist in the klayout_layers.lyp
+# This means it should throw a KeyError before running nw_sleeve.
+# The test will expect this KeyError, but not a TypeError
+---
+-   - nw_sleeve
+    - Delta: 'not a float'  # This will cause a TypeError if it runs, so the test will fail
+-   - mask_map
+    - mask_nw_ebeam: m2_nw_ebeam + not_in_lyp
+...

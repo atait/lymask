@@ -213,6 +213,5 @@ def reload_lys(technology=None, clear=False, dataprep=False):
             lv.transaction('Bump transaction')
         lv.current_layer_list = 0
 
-
 # reload_lys()
 

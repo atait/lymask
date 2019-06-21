@@ -12,7 +12,7 @@ from lymask.utilities import gui_view, gui_active_layout, \
                              active_technology, set_active_technology, \
                              tech_layer_properties, \
                              lys, reload_lys
-from lymask.steps import all_func_dict
+from lymask.steps import all_func_dict, assert_valid_step_list
 
 
 parser = argparse.ArgumentParser(description="Command line mask dataprep")
@@ -34,10 +34,10 @@ def cm_main():
 
 def _main(layout, ymlfile, tech_obj=None):
     # todo: figure out which technology we will be using and its layer properties
-    # todo: reload lys using technology
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
     reload_lys(tech_obj, dataprep=True)
+    assert_valid_step_list(step_list)
     for func_info in step_list:
         func = all_func_dict[func_info[0]]
         try:

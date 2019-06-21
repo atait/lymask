@@ -1,5 +1,8 @@
 import os, sys
 import subprocess
+import pytest
+import pya
+
 os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
 
 import lymask
@@ -26,13 +29,20 @@ def test_from_technology():
     run_xor(outfile, reffile)
 
 
-# def test_cm():
-#     command = ['lymask']
-#     command += [layout_file]
-#     command += [dataprep_file]
-#     command += ['-o', outfile]
-#     subprocess.check_call(command)
-#     run_xor(outfile, reffile)
+def test_lyp_loading():
+    from lymask.utilities import set_active_technology, reload_lys, lys
+    layout = pya.Layout()
+    layout.read(layout_file)
+    lys.active_layout = layout
+
+    lymask.set_active_technology('example_tech')
+    lymask.utilities.reload_lys()
+
+    assert lys['m5_wiring'] is lys('m5_wiring') is lys.m5_wiring
+
+    with pytest.raises(KeyError):
+        batch_main(layout_file, ymlspec='bad_masks', technology='example_tech')
+
 
 def test_cm_from_tech():
     # this also checks that it defaults to default.yml

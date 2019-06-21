@@ -180,42 +180,45 @@ def precomp(cell, **kwargs):
 def mask_map(cell, clear_others=False, **kwargs):
     ''' lyp_file is relative to the yml file. If it is None, the same layer properties will be used.
         kwarg keys are destination layers and values are source layers, which can include "+"
+
+        There is a problem if you have 101 defined in your file and then another layer that is not defined.
     '''
     mask_layer_index = 101
+    assert_valid_mask_map(kwargs)
     # merging and moving to new layers
     for dest_layer, src_expression in kwargs.items():
-        new_layinfo = pya.LayerInfo(mask_layer_index, 0, dest_layer)
-        lys[dest_layer] = new_layinfo
-        cell.layout().layer(new_layinfo)
+        if not dest_layer in lys.keys():
+            new_layinfo = pya.LayerInfo(mask_layer_index, 0, dest_layer)
+            lys[dest_layer] = new_layinfo
+            cell.layout().layer(new_layinfo)
+
+        components = src_expression.split('+')
+        for comp in components:
+            comp_lay_info = lys[comp.strip()]
+            cell.copy(comp_lay_info, lys[dest_layer])
+        mask_layer_index += 1
+
+    if clear_others:
+        for any_layer in lys.keys():
+            if any_layer not in kwargs.keys() and any_layer != 'FLOORPLAN':
+                cell.clear(lys[any_layer])
+
+
+def assert_valid_mask_map(mapping):
+    for dest_layer, src_expression in mapping.items():
+        try:
+            lys[dest_layer]
+        except KeyError as err:
+            message_loud('Warning: Destination layer [{}] not found in mask layerset. We will make it...'.format(dest_layer))
+            pass  # This is allowed
+
         components = src_expression.split('+')
         for comp in components:
             try:
                 comp_lay_info = lys[comp.strip()]
             except KeyError as err:
-                message_loud('Source layer [{}] not found in existing designer or dataprep layerset.'.format(comp))
+                message_loud('Error: Source layer [{}] not found in existing designer or dataprep layerset.'.format(comp))
                 raise
-            cell.copy(comp_lay_info, lys[dest_layer])
-        mask_layer_index += 1
-    # if isGUI():
-    #     try:
-    #         lv = gui_view()
-    #         add_tab = True
-    #     except UserWarning:
-    #         # No view is selected. We might be in batch mode
-    #         add_tab = False
-    #     if add_tab:
-    #         insert_layer_tab(tab_name='Masks')
-    #         for dest_layer in kwargs.keys():
-    #             lay_prop = pya.LayerProperties()
-    #             lay_prop.source_name = lys.get_as_LayerInfo(dest_layer).name
-    #             lay_prop.source_layer = lys.get_as_LayerInfo(dest_layer).layer
-    #             lay_prop.source_datatype = lys.get_as_LayerInfo(dest_layer).datatype
-    #             lv.init_layer_properties(lay_prop)
-    #             lv.insert_layer(lv.end_layers(), lay_prop)
-    if clear_others:
-        for any_layer in lys.keys():
-            if any_layer not in kwargs.keys() and any_layer != 'FLOORPLAN':
-                cell.clear(lys[any_layer])
 
 
 @dpStep
@@ -228,7 +231,6 @@ def clear_nonmask(cell):
         is_mask = 100 < lay and lay < 200
         if not is_mask:
             cell.clear(lys[any_layer])
-
 
 
 @dpStep
@@ -261,3 +263,21 @@ def align_corners(cell):
                 mark = corner_mark.moved(east_west, north_south)
                 if not cell.shapes(ly.layer(marked_layer)).is_empty():
                     cell.shapes(ly.layer(marked_layer)).insert(mark)
+
+
+def assert_valid_step_list(step_list):
+    ''' This runs before starting calculations to make sure there aren't typos
+        that only show up after waiting for for all of the long steps
+    '''
+
+    # check function names
+    for func_info in step_list:
+        try:
+            func = all_func_dict[func_info[0]]
+        except KeyError as err:
+            message_loud('Function not supported. Available are {}'.format(all_func_dict.keys()))
+            raise
+
+    # check mask layers
+    if func is mask_map:
+        assert_valid_mask_map(func_info[1])
