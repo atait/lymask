@@ -27,7 +27,7 @@ def tech_layer_properties(pya_tech=None):
 
 
 def tech_dataprep_layer_properties(pya_tech=None):
-    ''' Returns the file containing the main layer properties
+    ''' Returns the file containing the dataprep layer properties
     '''
     if pya_tech is None:
         pya_tech = active_technology()
@@ -148,16 +148,16 @@ class LayerSet(dict):
                     new_obj[short_name] = source2pyaLayerInfo(memb['source'])
         return new_obj
 
-    def append(self, other):
+    def append(self, other, doubles_ok=False):
         for layname in other.keys():
-            if layname in self.keys():
+            if layname in self.keys() and not doubles_ok:
                 raise ValueError('Layer is doubly defined: {}'.format(layname))
             self[layname] = other.get_as_LayerInfo(layname)
 
     def appendFile(self, filename):
         other = LayerSet.fromFile(filename)
         other.active_layout = self.active_layout
-        self.append(other)
+        self.append(other, doubles_ok=True)
 
 
 def name2shortName(name_str):

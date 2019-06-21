@@ -4,7 +4,7 @@ import glob
 import os
 
 from lymask.invocation import gui_main
-from lymask.utilities import insert_layer_tab, tech_dataprep_layer_properties, reload_lys
+from lymask.utilities import insert_layer_tab, tech_dataprep_layer_properties, reload_lys, gui_view
 
 DEFAULT_TECH = 'OLMAC'
 
@@ -73,10 +73,11 @@ def reload_dataprep_menu(tech_name=None):
     menu = pya.Application.instance().main_window().menu()
     def refresh_layers():
         reload_lys(tech_name)
-        insert_layer_tab(tech_dataprep_layer_properties(), tab_name='Dataprep')
-        # insert_layer_tab(tab_name='Masks')
+        lv = gui_view()
+        lv.load_layer_props(tech_dataprep_layer_properties())
+        lv.current_layer_list = 0
     layer_action = _gen_new_action(refresh_layers)
     layer_action.title = 'Refresh layer display'
-    # layer_action.shortcut = 'Shift+Ctrl+P'
+    layer_action.shortcut = 'Shift+Ctrl+P'
     menu.insert_separator('soen_menu.dataprep.begin', 'SEP2')
     menu.insert_item('soen_menu.dataprep.begin', 'dataprep_layer_refresh', layer_action)
