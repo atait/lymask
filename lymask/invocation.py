@@ -11,7 +11,7 @@ from lymask import __version__
 from lymask.utilities import gui_view, gui_active_layout, \
                              active_technology, set_active_technology, \
                              tech_layer_properties, tech_dataprep_layer_properties, \
-                             lys, insert_layer_tab
+                             lys, load_dataprep_layers
 from lymask.steps import all_func_dict
 
 
@@ -37,9 +37,7 @@ def _main(layout, ymlfile, tech_obj=None):
     # todo: reload lys using technology
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
-    lys.clear()
-    lys.appendFile(tech_layer_properties(tech_obj))
-    insert_layer_tab(tech_dataprep_layer_properties(tech_obj), tab_name='Dataprep')
+    load_dataprep_layers(tech_obj)
     for func_info in step_list:
         func = all_func_dict[func_info[0]]
         try:

@@ -14,7 +14,7 @@ def set_active_technology(tech_name):
         raise ValueError('Technology not found. Available are {}'.format(Technology.technology_names()))
     global _active_technology
     _active_technology = Technology.technology_by_name(tech_name)
-    reload_lys(tech_name)
+    reload_lys(tech_name, clear=True)
 # end deprecation
 
 
@@ -149,12 +149,13 @@ class LayerSet(dict):
         return new_obj
 
     def append(self, other, doubles_ok=False):
+        ''' When doubles_ok is True and there is a collision, the other takes precedence '''
         for layname in other.keys():
             if layname in self.keys() and not doubles_ok:
                 raise ValueError('Layer is doubly defined: {}'.format(layname))
             self[layname] = other.get_as_LayerInfo(layname)
 
-    def appendFile(self, filename):
+    def appendFile(self, filename, doubles_ok=False):
         other = LayerSet.fromFile(filename)
         other.active_layout = self.active_layout
         self.append(other, doubles_ok=True)
@@ -184,10 +185,25 @@ def source2pyaLayerInfo(source_str):
     return pya.LayerInfo(int(layer), int(datatype))
 
 
-def insert_layer_tab(lyp_file=None, tab_name=None):
+def load_dataprep_layers(technology=None):
     ''' Also updates lys, but if any of the layers are already there, it does nothing.
         If lyp_file is None, creates an empty layer list or does nothing if not in GUI mode.
     '''
+    if technology is None:
+        technology = active_technology()
+    reload_lys(technology, dataprep=True)
+    if isGUI():
+        lv = gui_view()
+        was_transacting = lv.is_transacting()
+        if was_transacting:
+            lv.commit()
+        lv.load_layer_props(tech_dataprep_layer_properties(technology))
+        if was_transacting:
+            lv.transaction('Bump transaction')
+        lv.current_layer_list = 0
+
+
+def insert_layer_tab(lyp_file=None, tab_name=None):
     if lyp_file is not None and lys is not None:
         try:
             lys.appendFile(lyp_file)
@@ -212,13 +228,15 @@ def insert_layer_tab(lyp_file=None, tab_name=None):
 
 
 lys = LayerSet()
-def reload_lys(technology=None):
-    lys.clear()
+def reload_lys(technology=None, clear=False, dataprep=False):
+    if isinstance(technology, str):
+        technology = Technology.technology_by_name(technology)
     try:
-        lyp_file = tech_layer_properties(Technology.technology_by_name(technology))
-        lys.appendFile(lyp_file)
+        lyp_file = tech_layer_properties(technology) if not dataprep else tech_dataprep_layer_properties(technology)
     except (FileNotFoundError, AttributeError):
         print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
+    if clear: lys.clear()
+    lys.appendFile(lyp_file, doubles_ok=True)
 
 
 # reload_lys()
