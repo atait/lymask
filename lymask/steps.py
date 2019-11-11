@@ -139,6 +139,7 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
     gp_region.merge()
     gp_region += as_region(cell, 'm5_gnd')
     gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
+    gp_region = gp_region.smoothed(.001)
     gp_region.merge()
     gp_region = fast_sized(gp_region, -1 / dbu)  # kill narrow widths
     gp_region = fast_sized(gp_region, 1 / dbu)
