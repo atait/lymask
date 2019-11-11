@@ -117,7 +117,7 @@ def waveguide_sleeve(cell, Delta_nw_si=2.0, Delta=2.0, delta=0.2, do_photo=True)
 
 
 @dpStep
-def ground_plane(cell, Delta_gp=15.0, points_per_circle=100):
+def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
     Delta_gp /= dbu
     cell.clear(lys.gp_photo)
     # Accumulate everything that we don't want to cover in metal
@@ -135,12 +135,22 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100):
     gp_exclusion_zone = fast_sized(gp_exclusion_tight, Delta_gp)
     gp_region = as_region(cell, 'FLOORPLAN') - gp_exclusion_zone
 
-    # Connect to pads
+    # Connect to ground pads
     gp_region.merge()
-    gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
     gp_region += as_region(cell, 'm5_gnd')
+    gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
     gp_region.merge()
+    gp_region = fast_sized(gp_region, -1 / dbu)  # kill narrow widths
+    gp_region = fast_sized(gp_region, 1 / dbu)
     cell.shapes(lys.gp_photo).insert(gp_region)
+
+    # Open up to the air
+    if air_open is not None:
+        fp_safe = as_region(cell, 'FLOORPLAN')
+        air_rects = fp_safe - fp_safe.sized(0, -air_open / dbu, 0)
+        air_region = air_rects & gp_region
+        air_region = fast_sized(air_region, -20 / dbu)
+        cell.shapes(lys.gp_v5).insert(air_region)
 
 
 has_precomped = dict()
