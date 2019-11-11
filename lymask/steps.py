@@ -266,6 +266,8 @@ def align_corners(cell):
     for marked_layer in all_layers:
         if marked_layer.name in ['FLOORPLAN']:  # put exceptions here
             continue
+        if cell.shapes(ly.layer(marked_layer)).is_empty():
+            continue
         # do some boolean here to shave off overhangs
         layer_region = as_region(cell, marked_layer)
         layer_region = layer_region & as_region(cell, 'FLOORPLAN')
@@ -276,8 +278,9 @@ def align_corners(cell):
         for north_south in (fp_box.top - 1, fp_box.bottom):
             for east_west in (fp_box.right - 1, fp_box.left):
                 mark = corner_mark.moved(east_west, north_south)
-                if not cell.shapes(ly.layer(marked_layer)).is_empty():
-                    cell.shapes(ly.layer(marked_layer)).insert(mark)
+                if marked_layer.name == 'DRC_exclude' or marked_layer.layer == 91:
+                    mark = mark.enlarged(1, 1)
+                cell.shapes(ly.layer(marked_layer)).insert(mark)
 
 
 def assert_valid_step_list(step_list):
