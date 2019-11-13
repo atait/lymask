@@ -137,12 +137,12 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
 
     # Connect to ground pads
     gp_region.merge()
-    gp_region += as_region(cell, 'm5_gnd')
-    gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
-    gp_region = gp_region.smoothed(.001)
-    gp_region.merge()
     gp_region = fast_sized(gp_region, -1 / dbu)  # kill narrow widths
     gp_region = fast_sized(gp_region, 1 / dbu)
+    gp_region += as_region(cell, 'm5_gnd')
+    gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
+    gp_region = gp_region.smoothed(.001)  # avoid some bug in pya
+    gp_region.merge()
     cell.shapes(lys.gp_photo).insert(gp_region)
 
     # Open up to the air
@@ -208,7 +208,7 @@ def mask_map(cell, clear_others=False, **kwargs):
             lys[dest_layer] = new_layinfo
             cell.layout().layer(new_layinfo)
 
-        components = src_expression.split('+')
+        components = src_expression.split(' + ')
         for comp in components:
             comp_lay_info = lys[comp.strip()]
             cell.copy(comp_lay_info, lys[dest_layer])
@@ -235,6 +235,15 @@ def assert_valid_mask_map(mapping):
             except KeyError as err:
                 message_loud('Error: Source layer [{}] not found in existing designer or dataprep layerset.'.format(comp))
                 raise
+
+
+@dpStep
+def smooth_floating(cell, deviation=0.005):
+    for layer_name in lys.keys():
+        layer_region = as_region(cell, layer_name)
+        layer_region = fast_smoothed(layer_region, deviation)
+        cell.clear(lys[layer_name])
+        cell.shapes(lys[layer_name]).insert(layer_region)
 
 
 @dpStep
