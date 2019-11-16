@@ -122,7 +122,7 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
     cell.clear(lys.gp_photo)
     # Accumulate everything that we don't want to cover in metal
     gp_exclusion_things = pya.Region()
-    for layname in ['wg_deep', 'wg_shallow', 'm1_nwpad',
+    for layname in ['wg_deep', 'wg_deep_photo', 'wg_shallow', 'm1_nwpad',
                     'm4_ledpad', 'm3_res', 'm5_wiring', 'm2_nw',
                     'GP_KO']:
         try:
@@ -152,6 +152,18 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
         air_region = air_rects & gp_region
         air_region = fast_sized(air_region, -20 / dbu)
         cell.shapes(lys.gp_v5).insert(air_region)
+
+
+@dpStep
+def metal_pedestal(cell, pedestal_layer='wg_full_photo', offset=0):
+    metal_region = pya.Region()
+    for layname in ['m5_wiring', 'm5_gnd', 'gp_photo']:
+        try:
+            metal_region += as_region(cell, layname)
+        except: pass
+    valid_metal = metal_region - fast_sized(as_region(cell, lys.wg_deep), offset / dbu)
+    pedestal_region = fast_sized(valid_metal, offset / dbu)
+    cell.shapes(lys[pedestal_layer]).insert(pedestal_region)
 
 
 has_precomped = dict()
@@ -239,6 +251,8 @@ def assert_valid_mask_map(mapping):
 
 @dpStep
 def smooth_floating(cell, deviation=0.005):
+    ''' Removes teeny tiny edges that sometimes show up in curved edges with angles 0 or 90 plus tiny epsilon
+    '''
     for layer_name in lys.keys():
         layer_region = as_region(cell, layer_name)
         layer_region = fast_smoothed(layer_region, deviation)
@@ -252,8 +266,8 @@ def clear_nonmask(cell):
         Same as clear_others in mask_map
     '''
     for any_layer in lys.keys():
-        lay = lys[any_layer].gds_layer
-        is_mask = 100 < lay and lay < 200
+        lay = lys[any_layer]
+        is_mask = (100 <= lay and lay < 200) or any_layer == 'FLOORPLAN'
         if not is_mask:
             cell.clear(lys[any_layer])
 
