@@ -148,20 +148,22 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
     # Open up to the air
     if air_open is not None:
         fp_safe = as_region(cell, 'FLOORPLAN')
-        Delta_air = 15 / dbu
         air_rects = fp_safe - fp_safe.sized(0, -air_open / dbu, 0)
-        # air_exclusion_zone = fast_sized(gp_exclusion_tight & air_rects, Delta_air)
-        relevant_gp = air_rects & gp_region
-        air_region = fast_sized(relevant_gp, -Delta_air)
-        air_region.merge()
-        air_region = fast_sized(air_region, -5 / dbu)  # kill narrow widths
-        air_region = fast_sized(air_region, 5 / dbu)
-        # air_region = fast_sized(air_region, -20 / dbu)
-        air_region = air_region.smoothed(5)
-        air_region.round_corners(Delta_air / 2, Delta_air / 2, points_per_circle)
-        air_region.merge()
-        # air_region = fast_smoothed(air_region, 2)
+        air_region = air_rects & gp_region
+        air_region = fast_sized(air_region, -20 / dbu)
         cell.shapes(lys.gp_v5).insert(air_region)
+
+
+@dpStep
+def metal_pedestal(cell, pedestal_layer='wg_full_photo', offset=0):
+    metal_region = pya.Region()
+    for layname in ['m5_wiring', 'm5_gnd', 'gp_photo']:
+        try:
+            metal_region += as_region(cell, layname)
+        except: pass
+    valid_metal = metal_region - fast_sized(as_region(cell, lys.wg_deep), offset / dbu)
+    pedestal_region = fast_sized(valid_metal, offset / dbu)
+    cell.shapes(lys[pedestal_layer]).insert(pedestal_region)
 
 
 has_precomped = dict()
@@ -249,6 +251,8 @@ def assert_valid_mask_map(mapping):
 
 @dpStep
 def smooth_floating(cell, deviation=0.005):
+    ''' Removes teeny tiny edges that sometimes show up in curved edges with angles 0 or 90 plus tiny epsilon
+    '''
     for layer_name in lys.keys():
         layer_region = as_region(cell, layer_name)
         layer_region = fast_smoothed(layer_region, deviation)
@@ -262,8 +266,8 @@ def clear_nonmask(cell):
         Same as clear_others in mask_map
     '''
     for any_layer in lys.keys():
-        lay = lys[any_layer].gds_layer
-        is_mask = 100 < lay and lay < 200
+        lay = lys[any_layer]
+        is_mask = (100 <= lay and lay < 200) or any_layer == 'FLOORPLAN'
         if not is_mask:
             cell.clear(lys[any_layer])
 
@@ -288,12 +292,11 @@ def align_corners(cell):
             continue
         if cell.shapes(ly.layer(marked_layer)).is_empty():
             continue
-
-        # do some boolean here to shave off overhangs - this is slow
-        # layer_region = as_region(cell, marked_layer)
-        # layer_region = layer_region & as_region(cell, 'FLOORPLAN')
-        # cell.clear(lys[marked_layer])
-        # cell.shapes(lys[marked_layer]).insert(layer_region)
+        # do some boolean here to shave off overhangs
+        layer_region = as_region(cell, marked_layer)
+        layer_region = layer_region & as_region(cell, 'FLOORPLAN')
+        cell.clear(lys[marked_layer])
+        cell.shapes(lys[marked_layer]).insert(layer_region)
 
         # put in the markers
         for north_south in (fp_box.top - 1, fp_box.bottom):

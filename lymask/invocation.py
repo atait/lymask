@@ -39,6 +39,7 @@ def _main(layout, ymlfile, tech_obj=None):
     reload_lys(tech_obj, dataprep=True)
     assert_valid_step_list(step_list)
     for func_info in step_list:
+        message('lymask doing {}'.format(func_info[0]))
         func = all_func_dict[func_info[0]]
         try:
             kwargs = func_info[1]
