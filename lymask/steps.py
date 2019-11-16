@@ -122,7 +122,7 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
     cell.clear(lys.gp_photo)
     # Accumulate everything that we don't want to cover in metal
     gp_exclusion_things = pya.Region()
-    for layname in ['wg_deep', 'wg_shallow', 'm1_nwpad',
+    for layname in ['wg_deep', 'wg_deep_photo', 'wg_shallow', 'm1_nwpad',
                     'm4_ledpad', 'm3_res', 'm5_wiring', 'm2_nw',
                     'GP_KO']:
         try:
