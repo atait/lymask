@@ -28,9 +28,10 @@ except:
 else:
     lygadgets.message('Initializing lymask')
 
-from lymask.menu import registerMenuItems, reload_dataprep_menu
+from lymask.menu import registerMenuItems, reload_dataprep_menu, reload_drc_menu
 registerMenuItems()
 reload_dataprep_menu()
+reload_drc_menu()
 
 </text>
 </klayout-macro>

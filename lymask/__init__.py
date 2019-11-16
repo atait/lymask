@@ -4,4 +4,4 @@ __lygadget_link__ = ['lygadgets', 'yaml']
 from lymask.utilities import active_technology, set_active_technology
 from lymask.invocation import batch_main
 
-import lymask.steps
+import lymask.dataprep_steps

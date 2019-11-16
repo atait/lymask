@@ -6,13 +6,13 @@ from lymask.utilities import lys, LayerSet, gui_view
 from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads
 
 
-all_func_dict = {}
+all_dpfunc_dict = {}
 def dpStep(step_fun):
     ''' Each step must accept one argument that is cell, plus optionals, and not return
 
         steps are added to all_steps *in the order they are defined*
     '''
-    all_func_dict[step_fun.__name__] = step_fun
+    all_dpfunc_dict[step_fun.__name__] = step_fun
     return step_fun
 
 
@@ -315,9 +315,9 @@ def assert_valid_step_list(step_list):
     # check function names
     for func_info in step_list:
         try:
-            func = all_func_dict[func_info[0]]
+            func = all_dpfunc_dict[func_info[0]]
         except KeyError as err:
-            message_loud('Function not supported. Available are {}'.format(all_func_dict.keys()))
+            message_loud('Function not supported. Available are {}'.format(all_dpfunc_dict.keys()))
             raise
 
     # check mask layers

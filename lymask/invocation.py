@@ -12,7 +12,8 @@ from lymask.utilities import gui_view, gui_active_layout, \
                              active_technology, set_active_technology, \
                              tech_layer_properties, \
                              lys, reload_lys
-from lymask.steps import all_func_dict, assert_valid_step_list
+from lymask.dataprep_steps import all_dpfunc_dict, assert_valid_step_list
+from lymask.drc_steps import all_drcfunc_dict
 
 
 parser = argparse.ArgumentParser(description="Command line mask dataprep")
@@ -40,7 +41,7 @@ def _main(layout, ymlfile, tech_obj=None):
     assert_valid_step_list(step_list)
     for func_info in step_list:
         message('lymask doing {}'.format(func_info[0]))
-        func = all_func_dict[func_info[0]]
+        func = all_dpfunc_dict[func_info[0]]
         try:
             kwargs = func_info[1]
         except IndexError:
@@ -49,6 +50,26 @@ def _main(layout, ymlfile, tech_obj=None):
             # call it
             func(layout.cell(TOP_ind), **kwargs)
     return layout
+
+def _drc_main(layout, ymlfile, tech_obj=None):
+    with open(ymlfile) as fx:
+        step_list = yaml.load(fx)
+    reload_lys(tech_obj, dataprep=True)
+
+    rdb = pya.ReportDatabase('DRC: {}'.format(os.path.basename(ymlfile)))
+    rdb.description = 'DRC: {}'.format(os.path.basename(ymlfile))
+
+    for func_info in step_list:
+        message('lymask doing {}'.format(func_info[0]))
+        func = all_drcfunc_dict[func_info[0]]
+        try:
+            kwargs = func_info[1]
+        except IndexError:
+            kwargs = dict()
+        for TOP_ind in layout.each_top_cell():
+            # call it
+            func(layout.cell(TOP_ind), rdb, **kwargs)
+    return rdb
 
 
 def gui_main(ymlfile=None):
@@ -62,6 +83,23 @@ def gui_main(ymlfile=None):
         processed = _main(layout, ymlfile=ymlfile, tech_obj=tech_obj)
     finally:
         gui_view().commit()
+
+
+def gui_drc_main(ymlfile=None):
+    layout = gui_active_layout()
+    lys.active_layout = layout
+    technology = gui_view().active_cellview().technology  # gets the technology from the selection menu
+    tech_obj = Technology.technology_by_name(technology)
+
+    lv = gui_view()
+    lv.transaction('lymask DRC')
+    try:
+        rdb = _drc_main(layout, ymlfile=ymlfile, tech_obj=tech_obj)
+    finally:
+        lv.commit()
+    rdix = lv.add_rdb(rdb)
+    lv.show_rdb(rdix, lv.active_cellview().index())
+
 
 
 def batch_main(infile, ymlspec=None, technology=None, outfile=None):
