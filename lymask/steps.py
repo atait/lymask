@@ -148,9 +148,19 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
     # Open up to the air
     if air_open is not None:
         fp_safe = as_region(cell, 'FLOORPLAN')
+        Delta_air = 15 / dbu
         air_rects = fp_safe - fp_safe.sized(0, -air_open / dbu, 0)
-        air_region = air_rects & gp_region
-        air_region = fast_sized(air_region, -20 / dbu)
+        # air_exclusion_zone = fast_sized(gp_exclusion_tight & air_rects, Delta_air)
+        relevant_gp = air_rects & gp_region
+        air_region = fast_sized(relevant_gp, -Delta_air)
+        air_region.merge()
+        air_region = fast_sized(air_region, -5 / dbu)  # kill narrow widths
+        air_region = fast_sized(air_region, 5 / dbu)
+        # air_region = fast_sized(air_region, -20 / dbu)
+        air_region = air_region.smoothed(5)
+        air_region.round_corners(Delta_air / 2, Delta_air / 2, points_per_circle)
+        air_region.merge()
+        # air_region = fast_smoothed(air_region, 2)
         cell.shapes(lys.gp_v5).insert(air_region)
 
 
