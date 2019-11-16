@@ -302,11 +302,12 @@ def align_corners(cell):
             continue
         if cell.shapes(ly.layer(marked_layer)).is_empty():
             continue
-        # do some boolean here to shave off overhangs
-        layer_region = as_region(cell, marked_layer)
-        layer_region = layer_region & as_region(cell, 'FLOORPLAN')
-        cell.clear(lys[marked_layer])
-        cell.shapes(lys[marked_layer]).insert(layer_region)
+
+        # do some boolean here to shave off overhangs - this is slow
+        # layer_region = as_region(cell, marked_layer)
+        # layer_region = layer_region & as_region(cell, 'FLOORPLAN')
+        # cell.clear(lys[marked_layer])
+        # cell.shapes(lys[marked_layer]).insert(layer_region)
 
         # put in the markers
         for north_south in (fp_box.top - 1, fp_box.bottom):
