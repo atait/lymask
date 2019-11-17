@@ -22,6 +22,14 @@ def as_region(cell, layname):
         return pya.Region()
 
 
+_thread_count = None
+def set_threads(thread_count):
+    ''' Set to None to disable parallel processing '''
+    global _thread_count
+    if thread_count == 1:
+        thread_count = None
+    _thread_count = thread_count
+
 
 def _normal_smoothed(unfiltered_region, deviation=0.1):
     smoothed_region = unfiltered_region.dup()
@@ -54,15 +62,6 @@ def fast_smoothed(unfiltered_region, deviation=0.1):
     return output_region
 
 
-_thread_count = None
-def set_threads(thread_count):
-    ''' Set to None to disable parallel processing '''
-    global _thread_count
-    if thread_count == 1:
-        thread_count = None
-    _thread_count = thread_count
-
-
 def fast_sized(input_region, xsize):
     # if something goes wrong, you can fall back to regular here by uncommenting
     if _thread_count is None:
@@ -78,3 +77,9 @@ def fast_sized(input_region, xsize):
         tp.threads = _thread_count
         tp.execute('Sizing job')
         return output_region
+
+
+def rdb_create(rdb, cell, category, violations):
+    rdb_cell = rdb.cell_by_qname(cell.name)
+    trans_to_um = pya.CplxTrans(dbu)
+    rdb.create_items(rdb_cell.rdb_id(), category.rdb_id(), trans_to_um, violations)

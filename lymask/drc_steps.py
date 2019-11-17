@@ -3,7 +3,7 @@ from functools import wraps
 from lygadgets import pya, isGUI, message, message_loud
 
 from lymask.utilities import lys, LayerSet, gui_view
-from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads
+from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create
 
 
 all_drcfunc_dict = {}
@@ -33,35 +33,28 @@ def processor(cell, rdb, thread_count=1, remote_host=None):
 
 @drcStep
 def width(cell, rdb, layer, value, angle=90):
-    rdb_cell = rdb.cell_by_qname(cell.name)
     rdb_category = rdb.create_category('{}_Width'.format(layer))
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature width violation'.format(layer, value)
 
     # do it
     polys = as_region(cell, layer)
     violations = polys.width_check(value / dbu, False, pya.Region.Square, angle, None, None)
-
-    trans_to_um = pya.CplxTrans(dbu)
-    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
+    rdb_create(rdb, cell, rdb_category, violations)
 
 
 @drcStep
 def space(cell, rdb, layer, value, angle=90):
-    rdb_cell = rdb.cell_by_qname(cell.name)
     rdb_category = rdb.create_category('{}_Space'.format(layer))
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature spacing violation'.format(layer, value)
 
     # do it
     polys = as_region(cell, layer)
     violations = polys.space_check(value / dbu, False, pya.Region.Square, angle, None, None)
-
-    trans_to_um = pya.CplxTrans(dbu)
-    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
+    rdb_create(rdb, cell, rdb_category, violations)
 
 
 @drcStep
 def inclusion(cell, rdb, inner, outer, include):
-    rdb_cell = rdb.cell_by_qname(cell.name)
     rdb_category = rdb.create_category('{} in {}'.format(inner, outer))
     rdb_category.description = '{} in {} [{:1.3f} um] - Minimum inclusion violation'.format(inner, outer, include)
 
@@ -70,19 +63,12 @@ def inclusion(cell, rdb, inner, outer, include):
     rout = as_region(cell, outer)
     outside = rin - rout
     too_close = rout.enclosing_check(rin, include / dbu)
-
-    # in_region_expanded = fast_sized(as_region(cell, inner), include)
-    # out_region = as_region(cell, outer)
-    # violations = in_region_expanded - out_region
-
-    trans_to_um = pya.CplxTrans(dbu)
-    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, outside)
-    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, too_close)
+    rdb_create(rdb, cell, rdb_category, outside)
+    rdb_create(rdb, cell, rdb_category, too_close)
 
 
 @drcStep
 def exclusion(cell, rdb, lay1, lay2, exclude):
-    rdb_cell = rdb.cell_by_qname(cell.name)
     rdb_category = rdb.create_category('{} from {}'.format(lay1, lay2))
     rdb_category.description = '{} from {} [{:1.3f} um] - Minimum exclusion violation'.format(lay1, lay2, exclude)
 
@@ -91,10 +77,8 @@ def exclusion(cell, rdb, lay1, lay2, exclude):
     r2 = as_region(cell, lay2)
     overlaps = r1 & r2
     too_close = r1.separation_check(r2, exclude / dbu)
-
-    trans_to_um = pya.CplxTrans(dbu)
-    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, overlaps)
-    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, too_close)
+    rdb_create(rdb, cell, rdb_category, overlaps)
+    rdb_create(rdb, cell, rdb_category, too_close)
 
 
 def assert_valid_drc_steps(step_list):
