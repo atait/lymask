@@ -34,10 +34,14 @@ def tech_dataprep_layer_properties(pya_tech=None):
     return pya_tech.eff_path('dataprep/klayout_layers_dataprep.lyp')
 
 
-def gui_view():
+def gui_window():
     patch_environment()  # makes sure the Application attribute gets spoofed into the standalone
     import pya
-    lv = pya.Application.instance().main_window().current_view()
+    return pya.Application.instance().main_window()
+
+
+def gui_view():
+    lv = gui_window().current_view()
     if lv is None:
         raise UserWarning("No view selected. Make sure you have an open layout.")
     return lv
