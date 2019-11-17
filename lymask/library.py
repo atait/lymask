@@ -82,4 +82,16 @@ def fast_sized(input_region, xsize):
 def rdb_create(rdb, cell, category, violations):
     rdb_cell = rdb.cell_by_qname(cell.name)
     trans_to_um = pya.CplxTrans(dbu)
-    rdb.create_items(rdb_cell.rdb_id(), category.rdb_id(), trans_to_um, violations)
+    drc_exclude = as_region(cell, 'DRC_exclude')
+    if isinstance(violations, pya.EdgePairs):
+        # This handles edge pairs
+        cleaned_violations = pya.EdgePairs()
+        for ep in violations.each():
+            edges = pya.Edges([ep.first, ep.second])
+            # If drc_exclude touches it at all, don't add it
+            if drc_exclude.interacting(edges).is_empty():
+                cleaned_violations.insert(ep)
+    else:
+        # Everything else
+        cleaned_violations = violations.outside(drc_exclude)
+    rdb.create_items(rdb_cell.rdb_id(), category.rdb_id(), trans_to_um, cleaned_violations)

@@ -29,6 +29,23 @@ def processor(cell, rdb, thread_count=1, remote_host=None):
     set_threads(thread_count)
 
 
+@drcStep
+def drcX(cell, rdb, on_input=[], on_output=[], none=None):
+    ''' DRC exclude handling. It takes lists of layers. There are three kinds
+            on_input: removes that layer in the DRC_exclude regions. This is fast but dangerous if you create a small hole in some polygon
+                This modifies the layout as you see it, so don't save.
+            on_output (default): does the full computations but does not output edges that fall within the DRC_exclude parts
+            none: output everything regardless of DRC_exclude
+    '''
+    if none is not None:
+        raise RuntimeError('none-type DRC exclude is not supported yet.')
+    for layer in on_input:
+        pre_exclude = as_region(cell, layer)
+        post_exclude = pre_exclude - as_region(cell, 'DRC_exclude')
+        cell.clear(lys[layer])
+        cell.shapes(lys[layer]).insert(post_exclude)
+    for layer in on_output:
+        pass  # good job you picked the default
 
 
 @drcStep

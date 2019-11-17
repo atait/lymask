@@ -73,6 +73,46 @@
   </item>
   <item>
    <tags/>
+   <category>'v3 in wg_deep'</category>
+   <cell>ff</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <values>
+    <value>polygon: (0.96,-0.75;0.96,-0.58;1.65,-0.58;1.65,-0.75)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'v3 in wg_deep'</category>
+   <cell>ff</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <values>
+    <value>polygon: (0.48,3.1;0.48,3.14;0.96,3.14;0.96,3.1)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'v3 in wg_deep'</category>
+   <cell>ff</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <values>
+    <value>polygon: (0.48,3.5;0.48,3.57;0.96,3.57;0.96,3.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'v3 in wg_deep'</category>
+   <cell>ff</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <values>
+    <value>edge-pair: (0.96,-0.085;0.96,-0.585)/(0.93,-0.18;0.93,-0.49)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
    <category>'m5_wiring from wg_deep'</category>
    <cell>ff</cell>
    <visited>false</visited>

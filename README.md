@@ -40,7 +40,7 @@ XX - command line reorganization
 XX - tests: generate the files and compare as xmldicts
 XX - angle limits
 - tiling
-- drc exclude
+XX - drc exclude
 - falling back on designer layers?
 XX - inclusion, exclusion
 - self overlap
