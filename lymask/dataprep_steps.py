@@ -155,14 +155,16 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
 
 
 @dpStep
-def metal_pedestal(cell, pedestal_layer='wg_full_photo', offset=0):
+def metal_pedestal(cell, pedestal_layer='wg_full_photo', offset=0, keepout=None):
     metal_region = pya.Region()
     for layname in ['m5_wiring', 'm5_gnd', 'gp_photo']:
         try:
             metal_region += as_region(cell, layname)
         except: pass
-    valid_metal = metal_region - fast_sized(as_region(cell, lys.wg_deep), offset / dbu)
+    valid_metal = metal_region - fast_sized(as_region(cell, lys['wg_deep']), offset / dbu)
     pedestal_region = fast_sized(valid_metal, offset / dbu)
+    if keepout is not None:
+        pedestal_region -= as_region(cell, keepout)
     cell.shapes(lys[pedestal_layer]).insert(pedestal_region)
 
 
@@ -200,9 +202,9 @@ def precomp(cell, **kwargs):
 
 
 @dpStep
-def mask_map(cell, clear_others=False, **kwargs):
+def mask_map(cell, **kwargs):
     ''' lyp_file is relative to the yml file. If it is None, the same layer properties will be used.
-        kwarg keys are destination layers and values are source layers, which can include "+"
+        kwarg keys are destination layers and values are source layers, which can be a list
 
         There is a problem if you have 101 defined in your file and then another layer that is not defined.
     '''
@@ -214,22 +216,18 @@ def mask_map(cell, clear_others=False, **kwargs):
         if occupied_layer.layer in available_mask_layers:
             available_mask_layers.remove(occupied_layer.layer)
     # merging and moving to new layers
-    for dest_layer, src_expression in kwargs.items():
+    for dest_layer, src_layers in kwargs.items():
         if not dest_layer in lys.keys():
             new_layinfo = pya.LayerInfo(available_mask_layers[new_mask_index], 0, dest_layer)
             lys[dest_layer] = new_layinfo
             cell.layout().layer(new_layinfo)
 
-        components = src_expression.split(' + ')
-        for comp in components:
-            comp_lay_info = lys[comp.strip()]
-            cell.copy(comp_lay_info, lys[dest_layer])
+        if not isinstance(src_layers, list):
+            src_layers = [src_layers]
+        # components = src_layers.split(' + ')  # old style
+        for src in src_layers:
+            cell.copy(lys[src], lys[dest_layer])
         new_mask_index += 1
-
-    if clear_others:
-        for any_layer in lys.keys():
-            if any_layer not in kwargs.keys() and any_layer != 'FLOORPLAN':
-                cell.clear(lys[any_layer])
 
 
 def assert_valid_mask_map(mapping):

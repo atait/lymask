@@ -1,17 +1,26 @@
 from __future__ import division, print_function, absolute_import
+import os
 from lygadgets import isGUI, pya, lyp_to_layerlist, patch_environment
 from lygadgets.technology import Technology, klayout_last_open_technology
 
-
 #: This global variable to be deprecated
-_active_technology = Technology.technology_by_name(klayout_last_open_technology())
+_active_technology = None
 def active_technology():
-    return _active_technology
+    ''' Gets active technology from GUI if in GUI, otherwise gives the stored variable, otherwise gives default last open
+    '''
+    if isGUI():
+        return gui_active_technology()
+    else:
+        if _active_technology is None:
+            _active_technology = Technology.technology_by_name(klayout_last_open_technology())
+        return _active_technology
 
 
 def set_active_technology(tech_name):
     if not Technology.has_technology(tech_name):
         raise ValueError('Technology not found. Available are {}'.format(Technology.technology_names()))
+    if isGUI() and tech_name != gui_active_technology().name:
+        raise RuntimeError('Cannot set technology via lymask while in GUI')
     global _active_technology
     _active_technology = Technology.technology_by_name(tech_name)
     reload_lys(tech_name, clear=True)
@@ -31,7 +40,11 @@ def tech_dataprep_layer_properties(pya_tech=None):
     '''
     if pya_tech is None:
         pya_tech = active_technology()
-    return pya_tech.eff_path('dataprep/klayout_layers_dataprep.lyp')
+    nominal_path = pya_tech.eff_path('dataprep/klayout_layers_dataprep.lyp')
+    if os.path.isfile(nominal_path):
+        return nominal_path
+    else:
+        return tech_layer_properties()
 
 
 def gui_window():
@@ -62,7 +75,7 @@ def gui_active_cell():
 
 
 def gui_active_technology():
-    technology = gui_view().active_cellview().technology  # gets the technology from the selection menu
+    technology = gui_window().initial_technology  # gets the technology from the selection menu
     tech_obj = Technology.technology_by_name(technology)
     return tech_obj
 
@@ -200,7 +213,7 @@ def reload_lys(technology=None, clear=False, dataprep=False):
     '''
     if technology is None:
         technology = active_technology()
-    if isinstance(technology, str):
+    elif isinstance(technology, str):
         technology = Technology.technology_by_name(technology)
 
     if clear: lys.clear()
@@ -218,7 +231,7 @@ def reload_lys(technology=None, clear=False, dataprep=False):
         lv.load_layer_props(lyp_file)
         if was_transacting:
             lv.transaction('Bump transaction')
-        lv.current_layer_list = 0
+        # lv.current_layer_list = 0
 
 # reload_lys()
 
