@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>Reload Dataprep Layers</description>
+ <description>Reload Dataprep</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -11,13 +11,21 @@
  <shortcut>Ctrl+L</shortcut>
  <show-in-menu>true</show-in-menu>
  <group-name/>
- <menu-path>soen_menu.dataprep.begin</menu-path>
+ <menu-path>lymask_menu.begin</menu-path>
  <interpreter>python</interpreter>
  <dsl-interpreter-name/>
  <text>
+''' Reloads layers organized into tabs for designer, dataprep, masks.
+    This helps viewing dataprepped files.
+
+    Also reloads dataprep and DRC menus. You would do this when you change the technology
+'''
 
 from lymask.utilities import reload_lys
+from lymask.menu import reload_lymask_menu
 reload_lys(dataprep=True)
+reload_lymask_menu('dataprep')
+reload_lymask_menu('drc')
 
 </text>
 </klayout-macro>
