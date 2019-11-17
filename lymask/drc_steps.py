@@ -17,46 +17,46 @@ def drcStep(step_fun):
 
 
 @drcStep
-def processor(cell, rdb, thread_count=1, remote_host=None):
-    if remote_host is not None:
-        message_loud('Automatic remote hosting is not yet supported')
-    set_threads(thread_count)
-
-
-@drcStep
 def make_rdbcells(cell, rdb):
     rdb.topcell = cell.name
     rdb_cell = rdb.create_cell(cell.name)
 
 
 @drcStep
-def width(cell, rdb, **kwargs):
-    rdb_cell = rdb.cell_by_qname(cell.name)
-    for layname, wid in kwargs.items():
-        rdb_category = rdb.create_category('{}_Width'.format(layname))
-        rdb_category.description = '{} [{:1.3f} um] - Minimum feature width violation'.format(layname, wid)
+def processor(cell, rdb, thread_count=1, remote_host=None):
+    if remote_host is not None:
+        message_loud('Automatic remote hosting is not yet supported')
+    set_threads(thread_count)
 
-        # do it
-        polys = as_region(cell, layname)
-        violations = polys.width_check(wid / dbu)
 
-        trans_to_um = pya.CplxTrans(dbu)
-        rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
 
 
 @drcStep
-def space(cell, rdb, **kwargs):
+def width(cell, rdb, layer, value, angle=90):
     rdb_cell = rdb.cell_by_qname(cell.name)
-    for layname, wid in kwargs.items():
-        rdb_category = rdb.create_category('{}_Space'.format(layname))
-        rdb_category.description = '{} [{:1.3f} um] - Minimum feature spacing violation'.format(layname, wid)
+    rdb_category = rdb.create_category('{}_Width'.format(layer))
+    rdb_category.description = '{} [{:1.3f} um] - Minimum feature width violation'.format(layer, value)
 
-        # do it
-        polys = as_region(cell, layname)
-        violations = polys.space_check(wid / dbu)
+    # do it
+    polys = as_region(cell, layer)
+    violations = polys.width_check(value / dbu, False, pya.Region.Square, angle, None, None)
 
-        trans_to_um = pya.CplxTrans(dbu)
-        rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
+    trans_to_um = pya.CplxTrans(dbu)
+    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
+
+
+@drcStep
+def space(cell, rdb, layer, value, angle=90):
+    rdb_cell = rdb.cell_by_qname(cell.name)
+    rdb_category = rdb.create_category('{}_Space'.format(layer))
+    rdb_category.description = '{} [{:1.3f} um] - Minimum feature spacing violation'.format(layer, value)
+
+    # do it
+    polys = as_region(cell, layer)
+    violations = polys.space_check(value / dbu, False, pya.Region.Square, angle, None, None)
+
+    trans_to_um = pya.CplxTrans(dbu)
+    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
 
 
 @drcStep
@@ -106,5 +106,5 @@ def assert_valid_drc_steps(step_list):
         try:
             func = all_drcfunc_dict[func_info[0]]
         except KeyError as err:
-            message_loud('Function not supported. Available are {}'.format(all_drcfunc_dict.keys()))
+            message_loud('Function "{}" not supported. Available are {}'.format(func_info[0], all_drcfunc_dict.keys()))
             raise

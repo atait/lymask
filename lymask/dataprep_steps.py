@@ -317,7 +317,7 @@ def assert_valid_dataprep_steps(step_list):
         try:
             func = all_dpfunc_dict[func_info[0]]
         except KeyError as err:
-            message_loud('Function not supported. Available are {}'.format(all_dpfunc_dict.keys()))
+            message_loud('Function "{}" not supported. Available are {}'.format(func_info[0], all_dpfunc_dict.keys()))
             raise
 
     # check mask layers

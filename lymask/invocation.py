@@ -39,22 +39,39 @@ def _drc_main(layout, ymlfile, tech_obj=None):
     if step_list[0][0] != 'make_rdbcells':
         step_list.insert(0, ['make_rdbcells'])
     reload_lys(tech_obj, dataprep=True)
-    assert_valid_drc_steps(step_list)
+    # assert_valid_drc_steps(step_list)
 
     rdb = pya.ReportDatabase('DRC: {}'.format(os.path.basename(ymlfile)))
     rdb.description = 'DRC: {}'.format(os.path.basename(ymlfile))
 
     for func_info in step_list:
-        message('lymask doing {}'.format(func_info[0]))
-        func = all_drcfunc_dict[func_info[0]]
-        try:
-            kwargs = func_info[1]
-        except IndexError:
-            kwargs = dict()
+        func, kwargs = func_info_to_func_and_kwargs(func_info)
+        message('lymask doing {}'.format(func.__name__))
         for TOP_ind in layout.each_top_cell():
-            # call it
             func(layout.cell(TOP_ind), rdb, **kwargs)
     return rdb
+
+
+def func_info_to_func_and_kwargs(func_info):
+    ''' There are several ways to specify it in the YML file.
+        It can be a list where first element is a function and second is a dict of kwargs.
+        It can be a dict where key is function and value is dict of kwargs.
+    '''
+    if isinstance(func_info, list):
+        message('Deprecation warning: spefifying a step as a list is going to go. Use dicts.')
+        if len(func_info) == 1:
+            func_info.append(dict())
+        if len(func_info) != 2:
+            raise TypeError('Function not specified correctly as a list (needs two elements): {}'.format(func_info))
+        func = all_drcfunc_dict[func_info[0]]
+        kwargs = func_info[1]
+    elif isinstance(func_info, dict):
+        if len(func_info.keys()) != 1:
+            raise TypeError('Function not specified correctly as a dictionary (needs one key): {}'.format(func_info))
+        for k, v in func_info.items():
+            func = all_drcfunc_dict[k]
+            kwargs = v
+    return func, kwargs
 
 
 def gui_main(ymlfile=None):

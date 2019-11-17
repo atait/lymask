@@ -63,6 +63,16 @@
   </item>
   <item>
    <tags/>
+   <category>wg_deep_Space</category>
+   <cell>ff</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <values>
+    <value>edge-pair: (6.382,0.695;5.832,0.495)/(5.832,0.495;6.417,0.495)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
    <category>'m5_wiring from wg_deep'</category>
    <cell>ff</cell>
    <visited>false</visited>
