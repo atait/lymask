@@ -1,7 +1,6 @@
 import os, sys
 import subprocess
 import xmltodict
-import pya
 
 import lymask
 from lymask import batch_drc_main
@@ -15,6 +14,7 @@ reffile = os.path.join(test_dir, '2_drc_answer.lyrdb')
 
 class DRC_difference(Exception):
     pass
+
 
 def assert_equal(rdb_file1, rdb_file2):
     ''' Errors if the rdbs are different.
@@ -41,13 +41,12 @@ def test_from_technology():
     assert_equal(outfile, reffile)
 
 
-# def test_cm_from_tech():
-#     # this also checks that it defaults to default.yml
-#     # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
-#     command = ['lymask']
-#     command += [layout_file]
-#     command += ['-o', outfile]
-#     command += ['-t', 'example_tech']
-#     subprocess.check_call(command)
-#     run_xor(outfile, reffile)
+def test_cm_from_tech():
+    # this also checks that it defaults to default.yml
+    command = ['lymask', 'drc']
+    command += [layout_file]
+    command += ['-o', outfile]
+    command += ['-t', 'example_tech']
+    subprocess.check_call(command)
+    assert_equal(outfile, reffile)
 

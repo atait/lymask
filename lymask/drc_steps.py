@@ -97,7 +97,7 @@ def exclusion(cell, rdb, lay1, lay2, exclude):
     rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, too_close)
 
 
-def assert_valid_step_list(step_list):
+def assert_valid_drc_steps(step_list):
     ''' This runs before starting calculations to make sure there aren't typos
         that only show up after waiting for for all of the long steps
     '''

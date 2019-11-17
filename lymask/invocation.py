@@ -1,36 +1,17 @@
 '''
-    Entry points from GUI, command line, and API
+    Entry points from GUI and API
 '''
 from __future__ import division, print_function, absolute_import
 import os
 import yaml
-import argparse
 from lygadgets import pya, message, Technology
 
-from lymask import __version__
 from lymask.utilities import gui_view, gui_active_layout, gui_window, gui_active_technology, \
                              active_technology, set_active_technology, \
                              tech_layer_properties, \
                              lys, reload_lys
-from lymask.dataprep_steps import all_dpfunc_dict, assert_valid_step_list
-from lymask.drc_steps import all_drcfunc_dict
-
-
-parser = argparse.ArgumentParser(description="Command line mask dataprep")
-parser.add_argument('infile', type=argparse.FileType('rb'),
-                    help='the input gds file')
-parser.add_argument('ymlspec', nargs='?', default=None,
-                    help='YML file that describes the dataprep steps and parameters. Can be relative to technology')
-parser.add_argument('-o', '--outfile', nargs='?', default=None,
-                    help='The output file. Default is to tack "_proc" onto the end')
-parser.add_argument('-t', '--technology', nargs='?', default=None,
-                    help='The name of technology to use. Must be visible in installed technologies')
-parser.add_argument('-v', '--version', action='version', version=f'%(prog)s v{__version__}')
-
-def cm_main():
-    ''' This one uses the klayout standalone '''
-    args = parser.parse_args()
-    batch_main(args.infile.name, ymlspec=args.ymlspec, outfile=args.outfile, technology=args.technology)
+from lymask.dataprep_steps import all_dpfunc_dict, assert_valid_dataprep_steps
+from lymask.drc_steps import all_drcfunc_dict, assert_valid_drc_steps
 
 
 def _main(layout, ymlfile, tech_obj=None):
@@ -38,7 +19,7 @@ def _main(layout, ymlfile, tech_obj=None):
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
     reload_lys(tech_obj, dataprep=True)
-    assert_valid_step_list(step_list)
+    assert_valid_dataprep_steps(step_list)
     for func_info in step_list:
         message('lymask doing {}'.format(func_info[0]))
         func = all_dpfunc_dict[func_info[0]]
@@ -58,6 +39,7 @@ def _drc_main(layout, ymlfile, tech_obj=None):
     if step_list[0][0] != 'make_rdbcells':
         step_list.insert(0, ['make_rdbcells'])
     reload_lys(tech_obj, dataprep=True)
+    assert_valid_drc_steps(step_list)
 
     rdb = pya.ReportDatabase('DRC: {}'.format(os.path.basename(ymlfile)))
     rdb.description = 'DRC: {}'.format(os.path.basename(ymlfile))

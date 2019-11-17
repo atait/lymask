@@ -307,7 +307,7 @@ def align_corners(cell):
                 cell.shapes(ly.layer(marked_layer)).insert(mark)
 
 
-def assert_valid_step_list(step_list):
+def assert_valid_dataprep_steps(step_list):
     ''' This runs before starting calculations to make sure there aren't typos
         that only show up after waiting for for all of the long steps
     '''

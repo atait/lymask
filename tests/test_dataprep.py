@@ -43,7 +43,7 @@ def test_from_technology():
 
 def test_cm_from_tech():
     # this also checks that it defaults to default.yml
-    command = ['lymask']
+    command = ['lymask', 'dataprep']
     command += [layout_file]
     command += ['-o', outfile]
     command += ['-t', 'example_tech']
