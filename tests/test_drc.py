@@ -13,6 +13,9 @@ outfile = os.path.join(test_dir, '2_drc_run.lyrdb')
 reffile = os.path.join(test_dir, '2_drc_answer.lyrdb')
 
 
+class DRC_difference(Exception):
+    pass
+
 def assert_equal(rdb_file1, rdb_file2):
     ''' Errors if the rdbs are different.
         This is done with dictionaries not the XML text itself
@@ -22,7 +25,8 @@ def assert_equal(rdb_file1, rdb_file2):
         rdbspec1 = xmltodict.parse(fx.read(), process_namespaces=True)
     with open(rdb_file2, 'r') as fx:
         rdbspec2 = xmltodict.parse(fx.read(), process_namespaces=True)
-    assert rdbspec1 == rdbspec2
+    if rdbspec1 != rdbspec2:
+        raise DRC_difference()
 
 
 # This one need Technology working
