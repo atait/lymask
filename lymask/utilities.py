@@ -226,13 +226,14 @@ def reload_lys(technology=None, clear=False, dataprep=False):
 
     if isGUI():
         lv = gui_view()
+        orig_list_index = lv.current_layer_list
         was_transacting = lv.is_transacting()
         if was_transacting:
             lv.commit()
         lv.load_layer_props(lyp_file)
         if was_transacting:
             lv.transaction('Bump transaction')
-        # lv.current_layer_list = 0
+        lv.current_layer_list = orig_list_index
 
 # reload_lys()
 
