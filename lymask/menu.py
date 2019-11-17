@@ -82,13 +82,13 @@ def reload_dataprep_menu(tech_name=None):
     for dataprep_file in glob.iglob(dataprep_dir + '/*.yml'):
         dataprep_yml_to_menu(dataprep_file, category='dataprep')
 
-    # Now put in the layers refresh
-    menu = pya.Application.instance().main_window().menu()
-    layer_action = _gen_new_action(lambda *args: reload_lys(*args, dataprep=True))
-    layer_action.title = 'Refresh layer display'
-    layer_action.shortcut = 'Shift+Ctrl+P'
-    menu.insert_separator('soen_menu.dataprep.begin', 'SEP2')
-    menu.insert_item('soen_menu.dataprep.begin', 'dataprep_layer_refresh', layer_action)
+    # Now put in the layers refresh... This is now done in a lym file
+    # menu = pya.Application.instance().main_window().menu()
+    # layer_action = _gen_new_action(lambda *args: reload_lys(*args, dataprep=True))
+    # layer_action.title = 'Refresh layer display'
+    # layer_action.shortcut = 'Ctrl+L'
+    # menu.insert_separator('soen_menu.dataprep.begin', 'SEP2')
+    # menu.insert_item('soen_menu.dataprep.begin', 'dataprep_layer_refresh', layer_action)
 
 
 def reload_drc_menu(tech_name=None):

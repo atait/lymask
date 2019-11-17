@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Reload Dataprep Layers</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut>Ctrl+L</shortcut>
+ <show-in-menu>true</show-in-menu>
+ <group-name/>
+ <menu-path>soen_menu.dataprep.begin</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+from lymask.utilities import reload_lys
+reload_lys(dataprep=True)
+
+</text>
+</klayout-macro>
