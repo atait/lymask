@@ -3,13 +3,11 @@ import subprocess
 import pytest
 import pya
 
-os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
-
 import lymask
 from lymask import batch_main
 from lytest import run_xor
 
-test_dir = os.path.dirname(__file__)
+from conftest import test_dir
 dataprep_file = os.path.join(test_dir, 'tech', 'example_tech', 'dataprep', 'default.yml')
 layout_file = os.path.join(test_dir, '1_src.oas')
 outfile = os.path.join(test_dir, '1_run.oas')
@@ -39,14 +37,12 @@ def test_lyp_loading():
 
 
 def test_from_technology():
-    # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
     batch_main(layout_file, ymlspec='default', outfile=outfile, technology='example_tech')
     run_xor(outfile, reffile)
 
 
 def test_cm_from_tech():
     # this also checks that it defaults to default.yml
-    # os.environ['KLAYOUT_HOME'] = os.path.dirname(os.path.realpath(__file__))
     command = ['lymask']
     command += [layout_file]
     command += ['-o', outfile]

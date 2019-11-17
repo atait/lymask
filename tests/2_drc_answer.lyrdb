@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<report-database>
+ <description>DRC: default.yml</description>
+ <original-file/>
+ <generator/>
+ <top-cell/>
+ <tags>
+ </tags>
+ <categories>
+  <category>
+   <name>wg_deep_Width</name>
+   <description>wg_deep [0.200 um] - Minimum feature width violation</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>wg_deep_Space</name>
+   <description>wg_deep [0.200 um] - Minimum feature spacing violation</description>
+   <categories>
+   </categories>
+  </category>
+ </categories>
+ <cells>
+  <cell>
+   <name>ff</name>
+   <variant/>
+   <references>
+   </references>
+  </cell>
+ </cells>
+ <items>
+  <item>
+   <tags/>
+   <category>wg_deep_Width</category>
+   <cell>ff</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <values>
+    <value>edge-pair: (-0.37,-0.92;-0.37,0.91)/(-0.22,0.91;-0.22,-0.92)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>wg_deep_Space</category>
+   <cell>ff</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <values>
+    <value>edge-pair: (-0.07,-0.89;-0.07,0.9)/(-0.22,0.91;-0.22,-0.92)</value>
+   </values>
+  </item>
+ </items>
+</report-database>

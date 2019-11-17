@@ -25,7 +25,6 @@
  <context-color>auto</context-color>
  <context-dimming>50</context-dimming>
  <context-hollow>false</context-hollow>
- <current-lib-view/>
  <current-ruler-template>0</current-ruler-template>
  <custom-macro-paths/>
  <dbu-units>false</dbu-units>
@@ -81,11 +80,8 @@
  <flat-cell-list>false</flat-cell-list>
  <full-hierarchy-new-cell>false</full-hierarchy-new-cell>
  <global-trans>r0</global-trans>
- <grid-axis-color>auto</grid-axis-color>
  <grid-color>auto</grid-color>
- <grid-grid-color>auto</grid-grid-color>
  <grid-micron>0.001</grid-micron>
- <grid-ruler-color>auto</grid-ruler-color>
  <grid-show-ruler>true</grid-show-ruler>
  <grid-style0>invisible</grid-style0>
  <grid-style1>dots</grid-style1>
@@ -104,27 +100,6 @@
  <inst-label-transform>true</inst-label-transform>
  <inst-visible>true</inst-visible>
  <key-bindings/>
- <l2ndb-export-circuit-cell-prefix>CIRCUIT_</l2ndb-export-circuit-cell-prefix>
- <l2ndb-export-device-cell-prefix>DEVICE_</l2ndb-export-device-cell-prefix>
- <l2ndb-export-net-cell-prefix>NET_</l2ndb-export-net-cell-prefix>
- <l2ndb-export-net-propname/>
- <l2ndb-export-produce-circuit-cells>false</l2ndb-export-produce-circuit-cells>
- <l2ndb-export-produce-device-cells>false</l2ndb-export-produce-device-cells>
- <l2ndb-export-start-layer-number>1000</l2ndb-export-start-layer-number>
- <l2ndb-marker-color>auto</l2ndb-marker-color>
- <l2ndb-marker-cycle-colors>255,0,0 0,255,0 0,0,255 255,255,0 255,0,255 0,255,255 160,80,255 255,160,0</l2ndb-marker-cycle-colors>
- <l2ndb-marker-cycle-colors-enabled>false</l2ndb-marker-cycle-colors-enabled>
- <l2ndb-marker-dither-pattern>-1</l2ndb-marker-dither-pattern>
- <l2ndb-marker-halo>-1</l2ndb-marker-halo>
- <l2ndb-marker-intensity>50</l2ndb-marker-intensity>
- <l2ndb-marker-line-width>-1</l2ndb-marker-line-width>
- <l2ndb-marker-use-original-colors>false</l2ndb-marker-use-original-colors>
- <l2ndb-marker-vertex-size>-1</l2ndb-marker-vertex-size>
- <l2ndb-max-shapes-highlighted>10000</l2ndb-max-shapes-highlighted>
- <l2ndb-show-all>true</l2ndb-show-all>
- <l2ndb-window-dim>1.0</l2ndb-window-dim>
- <l2ndb-window-mode>fit-net</l2ndb-window-mode>
- <l2ndb-window-state/>
  <layers-always-show-layout-index>false</layers-always-show-layout-index>
  <layers-always-show-ld>true</layers-always-show-ld>
  <layers-always-show-source>false</layers-always-show-source>
@@ -147,11 +122,10 @@
  <macro-editor-tab-width>8</macro-editor-tab-width>
  <macro-editor-watch-expressions/>
  <macro-editor-window-state/>
- <markers-visible>true</markers-visible>
  <menu-items-hidden/>
  <min-inst-label-size>16</min-inst-label-size>
  <mouse-wheel-mode>0</mouse-wheel-mode>
- <mru/>
+ <mru>'/Users/ant12/Documents/git-projects/layout-code/lymask/tests/2_drcsrc.gds' '/Users/ant12/Documents/git-projects/layout-code/lymask/tests/2_drcsrc.oas'</mru>
  <navigator-show-all-hier-levels>false</navigator-show-all-hier-levels>
  <navigator-show-images>true</navigator-show-images>
  <no-stipple>false</no-stipple>
@@ -189,7 +163,6 @@
  <ruler-templates>mode=normal,title=Ruler,category=_ruler,fmt=$D,fmt_x=$X,fmt_y=$Y,position=auto,xalign=auto,yalign=auto,xlabel_xalign=auto,xlabel_yalign=auto,ylabel_xalign=auto,ylabel_yalign=auto,style=ruler,outline=diag,snap=true,angle_constraint=global;mode=single_click,title=Cross,category=_cross,fmt='$U,$V',fmt_x='',fmt_y='',position=auto,xalign=auto,yalign=auto,xlabel_xalign=auto,xlabel_yalign=auto,ylabel_xalign=auto,ylabel_yalign=auto,style=cross_both,outline=diag,snap=true,angle_constraint=global;mode=auto_metric,title=Measure,category=_measure,fmt=$D,fmt_x=$X,fmt_y=$Y,position=auto,xalign=auto,yalign=auto,xlabel_xalign=auto,xlabel_yalign=auto,ylabel_xalign=auto,ylabel_yalign=auto,style=ruler,outline=diag,snap=true,angle_constraint=global;mode=normal,title=Ellipse,category='',fmt='',fmt_x='W=$(abs(X))',fmt_y='H=$(abs(Y))',position=auto,xalign=auto,yalign=auto,xlabel_xalign=auto,xlabel_yalign=auto,ylabel_xalign=auto,ylabel_yalign=auto,style=line,outline=ellipse,snap=true,angle_constraint=global;mode=normal,title=Box,category='',fmt='',fmt_x='W=$(abs(X))',fmt_y='H=$(abs(Y))',position=auto,xalign=auto,yalign=auto,xlabel_xalign=auto,xlabel_yalign=auto,ylabel_xalign=auto,ylabel_yalign=auto,style=line,outline=box,snap=true,angle_constraint=global</ruler-templates>
  <rulers>-1</rulers>
  <salt-manager-window-state/>
- <search-range>5</search-range>
  <sel-color>auto</sel-color>
  <sel-dither-pattern>1</sel-dither-pattern>
  <sel-halo>true</sel-halo>
@@ -204,16 +177,13 @@
  <shb-window-dim>1.0</shb-window-dim>
  <shb-window-mode>fit-marker</shb-window-mode>
  <shb-window-state/>
- <show-bookmarks-view>false</show-bookmarks-view>
  <show-hierarchy-panel>true</show-hierarchy-panel>
  <show-layer-panel>true</show-layer-panel>
  <show-layer-toolbox>true</show-layer-toolbox>
- <show-libraries-view>true</show-libraries-view>
  <show-navigator>false</show-navigator>
  <show-properties>false</show-properties>
  <show-toolbar>true</show-toolbar>
  <split-cell-list>false</split-cell-list>
- <split-lib-views>false</split-lib-views>
  <sr-max-item-count>1000</sr-max-item-count>
  <sr-window-dim>1.0</sr-window-dim>
  <sr-window-mode>fit-marker</sr-window-mode>
@@ -229,9 +199,9 @@
  <text-font>0</text-font>
  <text-lazy-rendering>true</text-lazy-rendering>
  <text-visible>true</text-visible>
- <tip-window-hidden>only-top-level-shown-by-default=4</tip-window-hidden>
+ <tip-window-hidden/>
  <window-geometry>AdnQywACAAAAAAGQAAAAyAAABK8AAAM1AAABkAAAAN4AAASvAAADNQAAAAAAAAAABaA=</window-geometry>
- <window-state>AAAA/wAAAAD9AAAAAgAAAAAAAAA+AAACAfwCAAAAA/sAAAAqAG4AYQB2AGkAZwBhAHQAbwByAF8AZABvAGMAawBfAHcAaQBkAGcAZQB0AAAAAAD/////AAAAkAD////7AAAAHABoAHAAXwBkAG8AYwBrAF8AdwBpAGQAZwBlAHQBAAAAPAAAAQAAAAAWAP////sAAAAgAGwAaQBiAHMAXwBkAG8AYwBrAF8AdwBpAGQAZwBlAHQBAAABPQAAAQAAAAAWAP///wAAAAEAAACUAAACAfwCAAAAA/sAAAAqAGIAbwBvAGsAbQBhAHIAawBzAF8AZABvAGMAawBfAHcAaQBkAGcAZQB0AAAAAAD/////AAAAFgD////7AAAAHABsAHAAXwBkAG8AYwBrAF8AdwBpAGQAZwBlAHQBAAAAPAAAAX4AAAAWAP////sAAAAcAGwAdABfAGQAbwBjAGsAXwB3AGkAZABnAGUAdAEAAAG7AAAAggAAAIIAAACCAAACTAAAAgEAAAAEAAAABAAAAAgAAAAI/AAAAAEAAAACAAAAAQAAAA4AdABvAG8AbABiAGEAcgEAAAAA/////wAAAAAAAAAA</window-state>
+ <window-state>AAAA/wAAAAD9AAAAAgAAAAAAAADLAAACAfwCAAAAAvsAAAAqAG4AYQB2AGkAZwBhAHQAbwByAF8AZABvAGMAawBfAHcAaQBkAGcAZQB0AAAAAAD/////AAAAkAD////7AAAAHABoAHAAXwBkAG8AYwBrAF8AdwBpAGQAZwBlAHQBAAAAPAAAAgEAAAAWAP///wAAAAEAAACUAAACAfwCAAAAAvsAAAAcAGwAcABfAGQAbwBjAGsAXwB3AGkAZABnAGUAdAEAAAA8AAABfgAAABYA////+wAAABwAbAB0AF8AZABvAGMAawBfAHcAaQBkAGcAZQB0AQAAAbsAAACCAAAAggAAAIIAAAG/AAACAQAAAAQAAAAEAAAACAAAAAj8AAAAAQAAAAIAAAABAAAADgB0AG8AbwBsAGIAYQByAQAAAAD/////AAAAAAAAAAA=</window-state>
  <xor-anotb>false</xor-anotb>
  <xor-axorb>true</xor-axorb>
  <xor-bnota>false</xor-bnota>

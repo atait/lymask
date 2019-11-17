@@ -1,7 +1,4 @@
 ---
--   - make_rdbcells
--   - processor
-    - thread_count: 1
 -   - width
     - wg_deep: 0.200
 -   - space

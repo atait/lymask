@@ -62,7 +62,10 @@ def gui_active_cell():
 
 
 def gui_active_technology():
-    pass # todo
+    technology = gui_view().active_cellview().technology  # gets the technology from the selection menu
+    tech_obj = Technology.technology_by_name(technology)
+    return tech_obj
+
 
 class LayerSet(dict):
     ''' getitem returns the logical layer (integer) that can be used in pya functions,

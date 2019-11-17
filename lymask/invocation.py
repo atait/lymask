@@ -8,7 +8,7 @@ import argparse
 from lygadgets import pya, message, Technology
 
 from lymask import __version__
-from lymask.utilities import gui_view, gui_active_layout, gui_window, \
+from lymask.utilities import gui_view, gui_active_layout, gui_window, gui_active_technology, \
                              active_technology, set_active_technology, \
                              tech_layer_properties, \
                              lys, reload_lys
@@ -55,6 +55,8 @@ def _main(layout, ymlfile, tech_obj=None):
 def _drc_main(layout, ymlfile, tech_obj=None):
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
+    if step_list[0][0] != 'make_rdbcells':
+        step_list.insert(0, ['make_rdbcells'])
     reload_lys(tech_obj, dataprep=True)
 
     rdb = pya.ReportDatabase('DRC: {}'.format(os.path.basename(ymlfile)))
@@ -76,8 +78,7 @@ def _drc_main(layout, ymlfile, tech_obj=None):
 def gui_main(ymlfile=None):
     layout = gui_active_layout()
     lys.active_layout = layout
-    technology = gui_view().active_cellview().technology  # gets the technology from the selection menu
-    tech_obj = Technology.technology_by_name(technology)
+    tech_obj = gui_active_technology()
 
     gui_view().transaction('Mask Dataprep')
     try:
@@ -89,8 +90,7 @@ def gui_main(ymlfile=None):
 def gui_drc_main(ymlfile=None):
     layout = gui_active_layout()
     lys.active_layout = layout
-    technology = gui_view().active_cellview().technology  # gets the technology from the selection menu
-    tech_obj = Technology.technology_by_name(technology)
+    tech_obj = gui_active_technology()
 
     lv = gui_view()
     lv.transaction('lymask DRC')
@@ -143,8 +143,10 @@ def resolve_ymlspec(ymlspec=None, technology=None, category='dataprep'):
     ''' Find the yml file that describes the process. There are several options for inputs
         # Option 1: file path is specified directly
         # Option 2: search within a specified technology
+
+        This also sets the active_technology stored in the module
     '''
-    if ymlspec is not None and os.path.exists(os.path.realpath(ymlspec)):
+    if ymlspec is not None and os.path.isfile(os.path.realpath(ymlspec)):
         # Option 1: file path is specified directly
         ymlfile = ymlspec
         if technology is not None:
@@ -162,9 +164,10 @@ def resolve_ymlspec(ymlspec=None, technology=None, category='dataprep'):
         if ymlspec is None:
             # default dataprep test
             ymlspec = 'default'
-        else:
-            # find path to tech
-            if not ymlspec.endswith('.yml'):
-                ymlspec += '.yml'
-            ymlfile = tech_obj.eff_path(os.path.join(category, ymlspec))
+        # find path to tech
+        if not ymlspec.endswith('.yml'):
+            ymlspec += '.yml'
+        ymlfile = tech_obj.eff_path(os.path.join(category, ymlspec))
+    if not os.path.isfile(ymlfile):
+        raise FileNotFoundError('Could not resolve YAML specification: {}'.format(ymlspec))
     return ymlfile
