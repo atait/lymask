@@ -224,26 +224,26 @@ def mask_map(cell, **kwargs):
 
         if not isinstance(src_layers, list):
             src_layers = [src_layers]
-        # components = src_layers.split(' + ')  # old style
         for src in src_layers:
             cell.copy(lys[src], lys[dest_layer])
         new_mask_index += 1
 
 
 def assert_valid_mask_map(mapping):
-    for dest_layer, src_expression in mapping.items():
+    for dest_layer, src_layers in mapping.items():
         try:
             lys[dest_layer]
         except KeyError as err:
             message_loud('Warning: Destination layer [{}] not found in mask layerset. We will make it...'.format(dest_layer))
             pass  # This is allowed
 
-        components = src_expression.split('+')
-        for comp in components:
+        if not isinstance(src_layers, list):
+            src_layers = [src_layers]
+        for src in src_layers:
             try:
-                comp_lay_info = lys[comp.strip()]
+                lys[src]
             except KeyError as err:
-                message_loud('Error: Source layer [{}] not found in existing designer or dataprep layerset.'.format(comp))
+                message_loud('Error: Source layer [{}] not found in existing designer or dataprep layerset.'.format(src))
                 raise
 
 
