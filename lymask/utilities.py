@@ -8,6 +8,7 @@ _active_technology = None
 def active_technology():
     ''' Gets active technology from GUI if in GUI, otherwise gives the stored variable, otherwise gives default last open
     '''
+    global _active_technology
     if isGUI():
         return gui_active_technology()
     else:
