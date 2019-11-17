@@ -32,3 +32,15 @@ To test command line and API, run `pytest tests`
 You can also go in the GUI and do it there, but that has to be manual
 
 This is also CI tested by Travis
+
+## DRC todo
+- batch launching
+- command line reorganization
+- output to lyrdb files
+- tests: generate the files and compare as xmldicts
+- drc exclude
+- falling back on designer layers?
+- inclusion, exclusion
+- self overlap
+- minimum area
+- edge lengths

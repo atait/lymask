@@ -31,34 +31,70 @@ def make_rdbcells(cell, rdb):
 
 @drcStep
 def width(cell, rdb, **kwargs):
+    rdb_cell = rdb.cell_by_qname(cell.name)
     for layname, wid in kwargs.items():
         rdb_category = rdb.create_category('{}_Width'.format(layname))
         rdb_category.description = '{} [{:1.3f} um] - Minimum feature width violation'.format(layname, wid)
 
         # do it
-        wid /= dbu
         polys = as_region(cell, layname)
-        edge_pairs = polys.width_check(wid)
+        violations = polys.width_check(wid / dbu)
 
-        rdb_cell = rdb.cell_by_qname(cell.name)
         trans_to_um = pya.CplxTrans(dbu)
-        rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, edge_pairs)
+        rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
 
 
 @drcStep
 def space(cell, rdb, **kwargs):
+    rdb_cell = rdb.cell_by_qname(cell.name)
     for layname, wid in kwargs.items():
         rdb_category = rdb.create_category('{}_Space'.format(layname))
         rdb_category.description = '{} [{:1.3f} um] - Minimum feature spacing violation'.format(layname, wid)
 
         # do it
-        wid /= dbu
         polys = as_region(cell, layname)
-        edge_pairs = polys.space_check(wid)
+        violations = polys.space_check(wid / dbu)
 
-        rdb_cell = rdb.cell_by_qname(cell.name)
         trans_to_um = pya.CplxTrans(dbu)
-        rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, edge_pairs)
+        rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, violations)
+
+
+@drcStep
+def inclusion(cell, rdb, inner, outer, include):
+    rdb_cell = rdb.cell_by_qname(cell.name)
+    rdb_category = rdb.create_category('{} in {}'.format(inner, outer))
+    rdb_category.description = '{} in {} [{:1.3f} um] - Minimum inclusion violation'.format(inner, outer, include)
+
+    # do it
+    rin = as_region(cell, inner)
+    rout = as_region(cell, outer)
+    outside = rin - rout
+    too_close = rout.enclosing_check(rin, include / dbu)
+
+    # in_region_expanded = fast_sized(as_region(cell, inner), include)
+    # out_region = as_region(cell, outer)
+    # violations = in_region_expanded - out_region
+
+    trans_to_um = pya.CplxTrans(dbu)
+    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, outside)
+    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, too_close)
+
+
+@drcStep
+def exclusion(cell, rdb, lay1, lay2, exclude):
+    rdb_cell = rdb.cell_by_qname(cell.name)
+    rdb_category = rdb.create_category('{} from {}'.format(lay1, lay2))
+    rdb_category.description = '{} from {} [{:1.3f} um] - Minimum exclusion violation'.format(lay1, lay2, exclude)
+
+    # do it
+    r1 = as_region(cell, lay1)
+    r2 = as_region(cell, lay2)
+    overlaps = r1 & r2
+    too_close = r1.separation_check(r2, exclude / dbu)
+
+    trans_to_um = pya.CplxTrans(dbu)
+    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, overlaps)
+    rdb.create_items(rdb_cell.rdb_id(), rdb_category.rdb_id(), trans_to_um, too_close)
 
 
 def assert_valid_step_list(step_list):
