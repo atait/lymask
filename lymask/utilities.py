@@ -41,9 +41,11 @@ def tech_dataprep_layer_properties(pya_tech=None):
     '''
     if pya_tech is None:
         pya_tech = active_technology()
-    nominal_path = pya_tech.eff_path('dataprep/klayout_layers_dataprep.lyp')
-    if os.path.isfile(nominal_path):
-        return nominal_path
+    dataprep_path = pya_tech.eff_path('dataprep')
+    for root, dirnames, filenames in os.walk(dataprep_path, followlinks=True):
+        for filename in filenames:
+            if filename.endswith('.lyp'):
+                return os.path.join(root, filename)
     else:
         return tech_layer_properties()
 
