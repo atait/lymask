@@ -3,8 +3,8 @@
 '''
 from __future__ import division, print_function, absolute_import
 from functools import wraps
-import pya
 from lymask.utilities import active_technology, lys
+from lygadgets import pya, message_loud
 
 try:
     dbu = active_technology().dbu
@@ -23,12 +23,14 @@ def as_region(cell, layname):
 
 
 _thread_count = None
-def set_threads(thread_count):
+_tiles = None
+def set_threads(thread_count, tiles=2):
     ''' Set to None to disable parallel processing '''
-    global _thread_count
+    global _thread_count, _tiles
     if thread_count == 1:
         thread_count = None
     _thread_count = thread_count
+    _tiles = tiles
 
 
 def _normal_smoothed(unfiltered_region, deviation=0.1):
@@ -76,6 +78,69 @@ def fast_sized(input_region, xsize):
         tp.tile_border(2 * xsize, 2 * xsize)
         tp.threads = _thread_count
         tp.execute('Sizing job')
+        return output_region
+
+
+def fast_space(input_region, spacing, angle=90):
+    # if something goes wrong, you can fall back to regular here by uncommenting
+    if _thread_count is None:
+        return input_region.space_check(spacing)
+    else:
+        output_edge_pairs = pya.Region()
+        tp = pya.TilingProcessor()
+        tp.input('in1', input_region)
+        tp.output('out1', output_edge_pairs)
+        # tp.queue("_output(out1, in1.space_check({}))".format(spacing))
+        tp.queue("_output(out1, in1.space_check({}, false, nil, {}, nil, nil))".format(spacing, angle))
+
+        border = 1.1 * spacing
+        tp.tile_border(border, border)
+        tp.tiles(_tiles, _tiles)
+        # bbox = input_region.bbox()
+        # die_wh = [bbox.width(), bbox.height()]
+        # tile_wh = [dim / _tiles for dim in die_wh]
+        # border_area = 2 * (tile_wh[0] + tile_wh[1]) * border
+        tp.threads = _thread_count
+        tp.execute('Spacing job')
+        return output_edge_pairs
+
+
+def turbo(input_region, meth_name, meth_args, tile_border=1, job_name='Tiling job'):
+    ''' Speeds things up by tiling. Parameters are determined by _thread_count and _tiles
+        if _thread_count is 1, it does not invoke tile processor at all
+        tile_border is in microns. Recommended that you make it 1.1 * the critical dimension.
+        args is a list.
+    '''
+    if not isinstance(meth_args, (list, tuple)):
+        meth_args = [meth_args]
+    if _thread_count is None:
+        return getattr(input_region, meth_name)(*meth_args)
+    else:
+        output_region = pya.Region()
+        tp = pya.TilingProcessor()
+        tp.input('in1', input_region)
+        tp.output('out1', output_region)
+
+        clean_args = list()
+        for arg in meth_args:
+            if arg is True:
+                clean_args.append('true')
+            elif arg is False:
+                clean_args.append('false')
+            elif arg is None:
+                clean_args.append('nil')
+            elif isinstance(arg, (pya.Region, pya.EdgePairs)):
+                tp.input('in2', arg)
+                clean_args.append('in2')
+            else:
+                clean_args.append(str(arg))
+        job_str = '_output(out1, in1.{}({}))'.format(meth_name, ', '.join(clean_args))
+        tp.queue(job_str)
+
+        tp.tile_border(tile_border, tile_border)
+        tp.tiles(_tiles, _tiles)
+        tp.threads = _thread_count
+        tp.execute(job_name)
         return output_region
 
 

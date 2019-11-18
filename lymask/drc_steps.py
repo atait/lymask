@@ -3,7 +3,7 @@ from functools import wraps
 from lygadgets import pya, isGUI, message, message_loud
 
 from lymask.utilities import lys, LayerSet, gui_view
-from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create
+from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create, fast_space, turbo
 
 
 all_drcfunc_dict = {}
@@ -23,10 +23,10 @@ def make_rdbcells(cell, rdb):
 
 
 @drcStep
-def processor(cell, rdb, thread_count=1, remote_host=None):
+def processor(cell, rdb, thread_count=1, tiles=2, remote_host=None):
     if remote_host is not None:
         message_loud('Automatic remote hosting is not yet supported')
-    set_threads(thread_count)
+    set_threads(thread_count, tiles=tiles)
 
 
 @drcStep
@@ -52,10 +52,13 @@ def drcX(cell, rdb, on_input=[], on_output=[], none=None):
 def width(cell, rdb, layer, value, angle=90):
     rdb_category = rdb.create_category('{}_Width'.format(layer))
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature width violation'.format(layer, value)
+    # message_loud('lymask doing {}'.format(rdb_category.name()))
 
     # do it
     polys = as_region(cell, layer)
-    violations = polys.width_check(value / dbu, False, pya.Region.Square, angle, None, None)
+    # violations = polys.width_check(value / dbu, False, pya.Region.Square, angle, None, None)
+    violations = turbo(polys, 'width_check', [value / dbu, False, None, angle, None, None],
+                       tile_border=1.1*value, job_name='{}_Width'.format(layer))
     rdb_create(rdb, cell, rdb_category, violations)
 
 
@@ -63,10 +66,13 @@ def width(cell, rdb, layer, value, angle=90):
 def space(cell, rdb, layer, value, angle=90):
     rdb_category = rdb.create_category('{}_Space'.format(layer))
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature spacing violation'.format(layer, value)
+    # message_loud('lymask doing {}'.format(rdb_category.name()))
 
     # do it
     polys = as_region(cell, layer)
-    violations = polys.space_check(value / dbu, False, pya.Region.Square, angle, None, None)
+    # violations = fast_space(polys, value / dbu, angle)
+    violations = turbo(polys, 'space_check', [value / dbu, False, None, angle, None, None],
+                       tile_border=1.1*value, job_name='{}_Space'.format(layer))
     rdb_create(rdb, cell, rdb_category, violations)
 
 
@@ -78,10 +84,12 @@ def inclusion(cell, rdb, inner, outer, include):
     # do it
     rin = as_region(cell, inner)
     rout = as_region(cell, outer)
-    outside = rin - rout
-    too_close = rout.enclosing_check(rin, include / dbu)
-    rdb_create(rdb, cell, rdb_category, outside)
-    rdb_create(rdb, cell, rdb_category, too_close)
+    # violations = rin.sized(include / dbu) - rout
+    big_rin = turbo(rin, 'sized', include / dbu,
+                    tile_border=1.1*include, job_name='{} in {}'.format(inner, outer))
+    violations = big_rin - rout
+
+    rdb_create(rdb, cell, rdb_category, violations)
 
 
 @drcStep
