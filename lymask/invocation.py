@@ -15,18 +15,14 @@ from lymask.drc_steps import all_drcfunc_dict, assert_valid_drc_steps
 
 
 def _main(layout, ymlfile, tech_obj=None):
-    # todo: figure out which technology we will be using and its layer properties
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
     reload_lys(tech_obj, dataprep=True)
     assert_valid_dataprep_steps(step_list)
     for func_info in step_list:
         message('lymask doing {}'.format(func_info[0]))
-        func = all_dpfunc_dict[func_info[0]]
-        try:
-            kwargs = func_info[1]
-        except IndexError:
-            kwargs = dict()
+        func_name, kwargs = func_info_to_func_and_kwargs(func_info)
+        func = all_dpfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             # call it
             func(layout.cell(TOP_ind), **kwargs)
@@ -36,7 +32,7 @@ def _main(layout, ymlfile, tech_obj=None):
 def _drc_main(layout, ymlfile, tech_obj=None):
     with open(ymlfile) as fx:
         step_list = yaml.load(fx)
-    if step_list[0][0] != 'make_rdbcells':
+    if func_info_to_func_and_kwargs(step_list[0])[0] != 'make_rdbcells':
         step_list.insert(0, ['make_rdbcells'])
     reload_lys(tech_obj, dataprep=True)
     # assert_valid_drc_steps(step_list)
@@ -45,8 +41,9 @@ def _drc_main(layout, ymlfile, tech_obj=None):
     rdb.description = 'DRC: {}'.format(os.path.basename(ymlfile))
 
     for func_info in step_list:
-        func, kwargs = func_info_to_func_and_kwargs(func_info)
         message('lymask doing {}'.format(func.__name__))
+        func_name, kwargs = func_info_to_func_and_kwargs(func_info)
+        func = all_drcfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             func(layout.cell(TOP_ind), rdb, **kwargs)
     return rdb
@@ -63,15 +60,15 @@ def func_info_to_func_and_kwargs(func_info):
             func_info.append(dict())
         if len(func_info) != 2:
             raise TypeError('Function not specified correctly as a list (needs two elements): {}'.format(func_info))
-        func = all_drcfunc_dict[func_info[0]]
+        func_name = func_info[0]
         kwargs = func_info[1]
     elif isinstance(func_info, dict):
         if len(func_info.keys()) != 1:
             raise TypeError('Function not specified correctly as a dictionary (needs one key): {}'.format(func_info))
         for k, v in func_info.items():
-            func = all_drcfunc_dict[k]
+            func_name = k
             kwargs = v
-    return func, kwargs
+    return func_name, kwargs
 
 
 def gui_main(ymlfile=None):
@@ -134,8 +131,8 @@ def batch_drc_main(infile, ymlspec=None, technology=None, outfile=None):
     # Write it
     rdb.save(outfile)
     # Brief report
-    print('DRC violations:', rdb.num_items())
-    print('Full report:', outfile)
+    message('DRC violations:', rdb.num_items())
+    message('Full report:', outfile)
 
 
 def resolve_ymlspec(ymlspec=None, technology=None, category='dataprep'):
