@@ -137,7 +137,8 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
 
     # Connect to ground pads
     gp_region.merge()
-    gp_region = fast_sized(gp_region, -1 / dbu)  # kill narrow widths
+    gp_region = fast_sized(gp_region, 1 / dbu)  # kill narrow spaces
+    gp_region = fast_sized(gp_region, -2 / dbu)  # kill narrow widths
     gp_region = fast_sized(gp_region, 1 / dbu)
     gp_region += as_region(cell, 'm5_gnd')
     gp_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
@@ -147,10 +148,15 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
 
     # Open up to the air
     if air_open is not None:
+        Delta_air = 5
         fp_safe = as_region(cell, 'FLOORPLAN')
         air_rects = fp_safe - fp_safe.sized(0, -air_open / dbu, 0)
         air_region = air_rects & gp_region
-        air_region = fast_sized(air_region, -20 / dbu)
+        air_region = fast_sized(air_region, -Delta_air / dbu)
+        air_region = fast_sized(air_region, 8 / dbu)  # kill narrow spaces
+        air_region = fast_sized(air_region, -16 / dbu)  # kill narrow widths
+        air_region = fast_sized(air_region, 8 / dbu)
+        air_region.round_corners(Delta_air, Delta_air, points_per_circle)
         cell.shapes(lys.gp_v5).insert(air_region)
 
 
@@ -161,7 +167,7 @@ def metal_pedestal(cell, pedestal_layer='wg_full_photo', offset=0, keepout=None)
         try:
             metal_region += as_region(cell, layname)
         except: pass
-    valid_metal = metal_region - fast_sized(as_region(cell, lys['wg_deep']), offset / dbu)
+    valid_metal = metal_region - fast_sized(as_region(cell, lys.wg_deep), offset / dbu)
     pedestal_region = fast_sized(valid_metal, offset / dbu)
     if keepout is not None:
         pedestal_region -= as_region(cell, keepout)
