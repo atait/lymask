@@ -20,8 +20,8 @@ def _main(layout, ymlfile, tech_obj=None):
     reload_lys(tech_obj, dataprep=True)
     assert_valid_dataprep_steps(step_list)
     for func_info in step_list:
-        message('lymask doing {}'.format(func_info[0]))
         func_name, kwargs = func_info_to_func_and_kwargs(func_info)
+        message('lymask doing {}'.format(func_name))
         func = all_dpfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             # call it
@@ -41,8 +41,8 @@ def _drc_main(layout, ymlfile, tech_obj=None):
     rdb.description = 'DRC: {}'.format(os.path.basename(ymlfile))
 
     for func_info in step_list:
-        message('lymask doing {}'.format(func.__name__))
         func_name, kwargs = func_info_to_func_and_kwargs(func_info)
+        message('lymask doing {}'.format(func_name))
         func = all_drcfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             func(layout.cell(TOP_ind), rdb, **kwargs)
