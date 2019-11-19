@@ -9,7 +9,7 @@ from lygadgets import pya, message, Technology
 from lymask.utilities import gui_view, gui_active_layout, gui_window, gui_active_technology, \
                              active_technology, set_active_technology, \
                              tech_layer_properties, \
-                             lys, reload_lys
+                             lys, reload_lys, func_info_to_func_and_kwargs
 from lymask.dataprep_steps import all_dpfunc_dict, assert_valid_dataprep_steps
 from lymask.drc_steps import all_drcfunc_dict, assert_valid_drc_steps
 
@@ -47,28 +47,6 @@ def _drc_main(layout, ymlfile, tech_obj=None):
         for TOP_ind in layout.each_top_cell():
             func(layout.cell(TOP_ind), rdb, **kwargs)
     return rdb
-
-
-def func_info_to_func_and_kwargs(func_info):
-    ''' There are several ways to specify it in the YML file.
-        It can be a list where first element is a function and second is a dict of kwargs.
-        It can be a dict where key is function and value is dict of kwargs.
-    '''
-    if isinstance(func_info, list):
-        message('Deprecation warning: spefifying a step as a list is going to go. Use dicts.')
-        if len(func_info) == 1:
-            func_info.append(dict())
-        if len(func_info) != 2:
-            raise TypeError('Function not specified correctly as a list (needs two elements): {}'.format(func_info))
-        func_name = func_info[0]
-        kwargs = func_info[1]
-    elif isinstance(func_info, dict):
-        if len(func_info.keys()) != 1:
-            raise TypeError('Function not specified correctly as a dictionary (needs one key): {}'.format(func_info))
-        for k, v in func_info.items():
-            func_name = k
-            kwargs = v
-    return func_name, kwargs
 
 
 def gui_main(ymlfile=None):

@@ -1,8 +1,12 @@
 from __future__ import division, print_function, absolute_import
 from functools import wraps
-from lygadgets import pya, isGUI, message, message_loud
+import os
+import importlib.util
 
-from lymask.utilities import lys, LayerSet, gui_view
+from lygadgets import pya, isGUI, message, message_loud
+from lygadgets import anyCell_to_anyCell
+
+from lymask.utilities import lys, LayerSet, gui_view, active_technology, func_info_to_func_and_kwargs
 from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads
 
 
@@ -14,6 +18,57 @@ def dpStep(step_fun):
     '''
     all_dpfunc_dict[step_fun.__name__] = step_fun
     return step_fun
+
+
+def dpStep_phidl(step_fun):
+    ''' phidl version, where the mutable object is a phidl.Device not a pya.Cell
+        Each step must accept one argument that is Device, plus optionals, and not return
+    '''
+    try:
+        from phidl import Device
+    except ImportError as err:
+        raise ImportError('You are probably trying to use phidl dataprep steps within a GUI. This is only supported in batch mode. Not my fault')
+    @wraps(step_fun)
+    def wrapper(cell, *args, **kwargs):
+        phidl_device = Device()
+        anyCell_to_anyCell(cell, phidl_device)
+        step_fun(phidl_device, *args, **kwargs)
+        anyCell_to_anyCell(phidl_device, cell)
+    all_dpfunc_dict[step_fun.__name__] = wrapper
+    return wrapper
+
+# @dpStep_phidl
+# def phidl_example(device):
+#     import phidl.geometry as pg
+#     device << pg.rectangle((10, 10))
+
+
+@dpStep
+def add_library(cell, filename):
+    ''' Imports from the filename, which is a path to a python file.
+        Anything within there that is a dpStep gets added to the all_dpfunc_dict for later
+    '''
+    if os.path.isfile(filename):
+        pass
+    else:
+        dataprep_relpath = os.path.join(active_technology().eff_path('dataprep'), filename)
+        if os.path.isfile(dataprep_relpath):
+            filename = os.path.realpath(dataprep_relpath)
+        else:
+            raise FileNotFoundError('lymask could not find {}'.format(filename))
+    modulename = os.path.splitext(os.path.basename(filename))[0]
+    spec = importlib.util.spec_from_file_location(modulename, filename)
+    foo = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(foo)
+    except ImportError as err:
+        if 'gdspy' in ImportError:
+            raise ImportError('You are probably trying to use phidl/gdspy dataprep steps within a GUI. This is only supported in batch mode currently')
+        else:
+            raise
+
+
+
 
 
 @dpStep
@@ -315,15 +370,17 @@ def assert_valid_dataprep_steps(step_list):
     ''' This runs before starting calculations to make sure there aren't typos
         that only show up after waiting for for all of the long steps
     '''
+    if any(func_info_to_func_and_kwargs(func_info)[0] == 'add_library' for func_info in step_list):
+        return
 
     # check function names
     for func_info in step_list:
         try:
-            func = all_dpfunc_dict[func_info[0]]
+            func = all_dpfunc_dict[func_info_to_func_and_kwargs(func_info)[0]]
         except KeyError as err:
             message_loud('Function "{}" not supported. Available are {}'.format(func_info[0], all_dpfunc_dict.keys()))
             raise
 
-    # check mask layers
-    if func is mask_map:
-        assert_valid_mask_map(func_info[1])
+        # check mask layers
+        if func is mask_map:
+            assert_valid_mask_map(func_info_to_func_and_kwargs(func_info)[1])

@@ -160,3 +160,4 @@ def rdb_create(rdb, cell, category, violations):
         # Everything else
         cleaned_violations = violations.outside(drc_exclude)
     rdb.create_items(rdb_cell.rdb_id(), category.rdb_id(), trans_to_um, cleaned_violations)
+

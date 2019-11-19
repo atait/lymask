@@ -1,6 +1,6 @@
 from __future__ import division, print_function, absolute_import
 import os
-from lygadgets import isGUI, pya, lyp_to_layerlist, patch_environment
+from lygadgets import isGUI, pya, message, lyp_to_layerlist, patch_environment
 from lygadgets.technology import Technology, klayout_last_open_technology
 
 #: This global variable to be deprecated
@@ -81,6 +81,28 @@ def gui_active_technology():
     technology = gui_window().initial_technology  # gets the technology from the selection menu
     tech_obj = Technology.technology_by_name(technology)
     return tech_obj
+
+
+def func_info_to_func_and_kwargs(func_info):
+    ''' There are several ways to specify commands in the YML file. This parses them into function name and arguments
+        It can be a list where first element is a function and second is a dict of kwargs.
+        It can be a dict where key is function and value is dict of kwargs.
+    '''
+    if isinstance(func_info, list):
+        message('Deprecation warning: spefifying a step as a list is going to go. Use dicts.')
+        if len(func_info) == 1:
+            func_info.append(dict())
+        if len(func_info) != 2:
+            raise TypeError('Function not specified correctly as a list (needs two elements): {}'.format(func_info))
+        func_name = func_info[0]
+        kwargs = func_info[1]
+    elif isinstance(func_info, dict):
+        if len(func_info.keys()) != 1:
+            raise TypeError('Function not specified correctly as a dictionary (needs one key): {}'.format(func_info))
+        for k, v in func_info.items():
+            func_name = k
+            kwargs = v
+    return func_name, kwargs
 
 
 class LayerSet(dict):
