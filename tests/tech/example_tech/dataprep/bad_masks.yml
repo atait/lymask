@@ -2,9 +2,8 @@
 # This means it should throw a KeyError before running nw_sleeve.
 # The test will expect this KeyError, but not a TypeError
 ---
--   - nw_sleeve
-    - Delta: 'not a float'  # This will cause a TypeError if it runs, so the test will fail
--   - mask_map
-    - a_new_layer: m2_nw  # This should not error
-    - mask_nw_ebeam: m2_nw + not_in_lyp
+-   nw_sleeve: {Delta: 'not a float'}  # This will cause a TypeError if it runs, so the test will fail
+-   mask_map:
+      a_new_layer: m2_nw  # This should not error
+      mask_nw_ebeam: [m2_nw, not_in_lyp]
 ...
