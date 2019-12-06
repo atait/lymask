@@ -88,20 +88,26 @@ def func_info_to_func_and_kwargs(func_info):
         It can be a list where first element is a function and second is a dict of kwargs.
         It can be a dict where key is function and value is dict of kwargs.
     '''
-    if isinstance(func_info, list):
+    if isinstance(func_info, str):
+        func_name = func_info
+        kwargs = dict()
+    elif isinstance(func_info, list):
         message('Deprecation warning: spefifying a step as a list is going to go. Use dicts.')
-        if len(func_info) == 1:
-            func_info.append(dict())
-        if len(func_info) != 2:
-            raise TypeError('Function not specified correctly as a list (needs two elements): {}'.format(func_info))
         func_name = func_info[0]
-        kwargs = func_info[1]
+        if len(func_info) == 1:
+            kwargs = dict()
+        elif len(func_info) == 2:
+            kwargs = func_info[1]
+        else:
+            raise TypeError('Function not specified correctly as a list (needs two elements): {}'.format(func_info))
     elif isinstance(func_info, dict):
         if len(func_info.keys()) != 1:
             raise TypeError('Function not specified correctly as a dictionary (needs one key): {}'.format(func_info))
         for k, v in func_info.items():
             func_name = k
             kwargs = v
+    else:
+        raise TypeError('Function not specified correctly. Need str, list, dict: {}'.format(func_info))
     return func_name, kwargs
 
 

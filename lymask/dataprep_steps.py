@@ -68,9 +68,6 @@ def add_library(cell, filename):
             raise
 
 
-
-
-
 @dpStep
 def check_floorplan(cell, fp_safe=50):
     ''' Checks for floorplan. If you didn't make one, this makes one.
@@ -119,10 +116,10 @@ def erase_text_and_other_junk(cell):
 
 
 @dpStep
-def processor(cell, thread_count=1, remote_host=None):
+def processor(cell, thread_count=1, tiles=2, remote_host=None):
     if remote_host is not None:
         message_loud('Automatic remote hosting is not yet supported')
-    set_threads(thread_count)
+    set_threads(thread_count, tiles)
 
 
 @dpStep
@@ -208,10 +205,10 @@ def ground_plane(cell, Delta_gp=15.0, points_per_circle=100, air_open=None):
         air_rects = fp_safe - fp_safe.sized(0, -air_open / dbu, 0)
         air_region = air_rects & gp_region
         air_region = fast_sized(air_region, -Delta_air / dbu)
-        air_region = fast_sized(air_region, 8 / dbu)  # kill narrow spaces
-        air_region = fast_sized(air_region, -16 / dbu)  # kill narrow widths
-        air_region = fast_sized(air_region, 8 / dbu)
-        air_region.round_corners(Delta_air, Delta_air, points_per_circle)
+        air_region = fast_sized(air_region, 4 / dbu)  # kill narrow spaces
+        air_region = fast_sized(air_region, -8 / dbu)  # kill narrow widths
+        air_region = fast_sized(air_region, 4 / dbu)
+        air_region.round_corners(Delta_gp / 5, Delta_gp / 3, points_per_circle)
         cell.shapes(lys.gp_v5).insert(air_region)
 
 
@@ -307,6 +304,12 @@ def assert_valid_mask_map(mapping):
                 message_loud('Error: Source layer [{}] not found in existing designer or dataprep layerset.'.format(src))
                 raise
 
+
+@dpStep
+def invert_tone(cell, layer):
+    inverted = as_region(cell, 'FLOORPLAN') - as_region(cell, layer)
+    cell.clear(lys[layer])
+    cell.shapes(lys[layer]).insert(inverted)
 
 @dpStep
 def smooth_floating(cell, deviation=0.005):
