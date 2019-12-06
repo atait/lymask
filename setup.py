@@ -17,7 +17,7 @@ setup(name='lymask',
       packages=['lymask'],
       install_requires=['klayout', 'lygadgets', 'PyYAML'],
       entry_points={'console_scripts': ['lymask=lymask.command_line:cm_main']},
-      package_data={'': ['*.lym']},
+      # package_data={'': ['*.lym']},
       include_package_data=True,
       cmdclass={},
       )
