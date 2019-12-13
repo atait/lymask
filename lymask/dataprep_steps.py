@@ -62,7 +62,7 @@ def add_library(cell, filename):
     try:
         spec.loader.exec_module(foo)
     except ImportError as err:
-        if 'gdspy' in ImportError:
+        if 'gdspy' in err.args[0]:
             raise ImportError('You are probably trying to use phidl/gdspy dataprep steps within a GUI. This is only supported in batch mode currently')
         else:
             raise
@@ -310,6 +310,7 @@ def invert_tone(cell, layer):
     inverted = as_region(cell, 'FLOORPLAN') - as_region(cell, layer)
     cell.clear(lys[layer])
     cell.shapes(lys[layer]).insert(inverted)
+
 
 @dpStep
 def smooth_floating(cell, deviation=0.005):
