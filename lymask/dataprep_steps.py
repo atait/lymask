@@ -222,7 +222,10 @@ def metal_pedestal(cell, pedestal_layer='wg_full_photo', offset=0, keepout=None)
     valid_metal = metal_region - fast_sized(as_region(cell, lys.wg_deep), offset / dbu)
     pedestal_region = fast_sized(valid_metal, offset / dbu)
     if keepout is not None:
-        pedestal_region -= as_region(cell, keepout)
+        if not isinstance(keepout, (list, tuple)):
+            keepout = [keepout]
+        for ko_layer in keepout:
+            pedestal_region -= as_region(cell, ko_layer)
     cell.shapes(lys[pedestal_layer]).insert(pedestal_region)
 
 
