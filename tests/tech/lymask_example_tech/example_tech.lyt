@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <technology>
- <name>example_tech</name>
+ <name>lymask_example_tech</name>
  <description>Tester for technology loader</description>
  <dbu>0.001</dbu>
  <base-path/>

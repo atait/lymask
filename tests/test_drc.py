@@ -6,7 +6,7 @@ import lymask
 from lymask import batch_drc_main
 
 from conftest import test_dir
-drc_file = os.path.join(test_dir, 'tech', 'example_tech', 'drc', 'default.yml')
+drc_file = os.path.join(test_dir, 'tech', 'lymask_example_tech', 'drc', 'default.yml')
 layout_file = os.path.join(test_dir, '2_drc_src.oas')
 outfile = os.path.join(test_dir, '2_drc_run.lyrdb')
 reffile = os.path.join(test_dir, '2_drc_answer.lyrdb')
@@ -31,13 +31,13 @@ def assert_equal(rdb_file1, rdb_file2):
 
 # This one need Technology working
 def test_api():
-    lymask.set_active_technology('example_tech')
+    lymask.set_active_technology('lymask_example_tech')
     batch_drc_main(layout_file, ymlspec=drc_file, outfile=outfile)
     assert_equal(outfile, reffile)
 
 
 def test_from_technology():
-    batch_drc_main(layout_file, ymlspec='default', outfile=outfile, technology='example_tech')
+    batch_drc_main(layout_file, ymlspec='default', outfile=outfile, technology='lymask_example_tech')
     assert_equal(outfile, reffile)
 
 
@@ -46,7 +46,7 @@ def test_cm_from_tech():
     command = ['lymask', 'drc']
     command += [layout_file]
     command += ['-o', outfile]
-    command += ['-t', 'example_tech']
+    command += ['-t', 'lymask_example_tech']
     subprocess.check_call(command)
     assert_equal(outfile, reffile)
 
