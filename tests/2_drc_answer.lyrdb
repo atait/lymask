@@ -48,7 +48,7 @@
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <values>
-    <value>edge-pair: (-0.37,-0.92;-0.37,0.91)/(-0.22,0.91;-0.22,-0.92)</value>
+    <value>edge-pair: (-0.37,-0.92;-0.37,0.91)|(-0.22,0.91;-0.22,-0.92)</value>
    </values>
   </item>
   <item>
@@ -58,7 +58,7 @@
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <values>
-    <value>edge-pair: (-0.07,-0.89;-0.07,0.9)/(-0.22,0.91;-0.22,-0.92)</value>
+    <value>edge-pair: (-0.07,-0.89;-0.07,0.9)|(-0.22,0.91;-0.22,-0.92)</value>
    </values>
   </item>
   <item>
@@ -68,7 +68,7 @@
    <visited>false</visited>
    <multiplicity>1</multiplicity>
    <values>
-    <value>edge-pair: (6.382,0.695;5.832,0.495)/(5.832,0.495;6.417,0.495)</value>
+    <value>edge-pair: (5.832,0.495;6.417,0.495)|(6.382,0.695;5.832,0.495)</value>
    </values>
   </item>
   <item>
