@@ -40,6 +40,8 @@ klayout will open. In dropdown, select the "OLMAC" technology. Then, click the b
 This generated layout is meant to feature X-section behavior. You can install "xsection" through klayout's salt manager, which will give additional commands for the GUI. Draw a ruler across the whole layout, and then press "Tools > XSection 1.4 Scripts > XSection: Current Technology (Shift + Ctrl + X)".
 
 ### Dataprep processing
+![image](wgnw_dataprep.png)
+
 Open another layout
 ```bash
 klayout SOEN-PDK/tech/OLMAC/olmac_pcells/ref_layouts/wg_to_snspd.gds

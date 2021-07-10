@@ -56,7 +56,7 @@ def width(cell, rdb, layer, value, angle=90):
 
     # do it
     polys = as_region(cell, layer)
-    # violations = polys.width_check(value / dbu, False, pya.Region.Square, angle, None, None)
+    # violations = polys.width_check(value / dbu, False, pya.Region.Euclidian, angle, None, None)
     violations = turbo(polys, 'width_check', [value / dbu, False, pya.Region.Euclidian, angle, None, None],
                        tile_border=1.1*value, job_name='{}_Width'.format(layer))
     rdb_create(rdb, cell, rdb_category, violations)
