@@ -252,7 +252,7 @@ def reload_lys(technology=None, clear=False, dataprep=False):
         lyp_file = tech_layer_properties(technology) if not dataprep else tech_dataprep_layer_properties(technology)
         lys.appendFile(lyp_file, doubles_ok=True)
     except (FileNotFoundError, AttributeError):
-        print('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
+        message_loud('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
 
     if isGUI():
         lv = gui_view()
