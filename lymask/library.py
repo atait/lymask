@@ -29,6 +29,8 @@ def set_threads(thread_count, tiles=2):
     global _thread_count, _tiles
     if thread_count == 1:
         thread_count = None
+    if thread_count is not None:
+        raise RuntumeError('Multicore support is acting up in latest klayout verstion. Set thread_count = 1 for now')
     _thread_count = thread_count
     _tiles = tiles
 
