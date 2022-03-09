@@ -1,6 +1,6 @@
 from __future__ import division, print_function, absolute_import
 import os
-from lygadgets import isGUI, pya, message, lyp_to_layerlist, patch_environment
+from lygadgets import isGUI, pya, message, message_loud, lyp_to_layerlist, patch_environment
 from lygadgets.technology import Technology, klayout_last_open_technology
 
 #: This global variable to be deprecated

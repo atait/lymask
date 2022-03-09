@@ -21,7 +21,7 @@ def _main(layout, ymlfile, tech_obj=None):
     assert_valid_dataprep_steps(step_list)
     for func_info in step_list:
         func_name, kwargs = func_info_to_func_and_kwargs(func_info)
-        message('lymask doing {}'.format(func_name))
+        message('lymask doing {}: {}'.format(func_name, kwargs))
         func = all_dpfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             # call it
@@ -42,7 +42,7 @@ def _drc_main(layout, ymlfile, tech_obj=None):
 
     for func_info in step_list:
         func_name, kwargs = func_info_to_func_and_kwargs(func_info)
-        message('lymask doing {}'.format(func_name))
+        message('lymask doing {}: {}'.format(func_name, kwargs))
         func = all_drcfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             func(layout.cell(TOP_ind), rdb, **kwargs)

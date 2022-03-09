@@ -4,7 +4,7 @@
 from __future__ import division, print_function, absolute_import
 from functools import wraps
 from lymask.utilities import active_technology, lys
-from lygadgets import pya, message_loud
+from lygadgets import pya, message, message_loud
 
 try:
     dbu = active_technology().dbu
@@ -15,11 +15,20 @@ except AttributeError:
 def as_region(cell, layname):
     ''' Mostly a convenience brevity function.
         If a layer isn't in the layer set, return an empty region instead of crashing
+        If a list, will return the union of the listed layers
     '''
-    try:
-        return pya.Region(cell.shapes(lys[layname]))
-    except KeyError:
-        return pya.Region()
+    if isinstance(layname, (list, tuple)):
+        union = pya.Region()
+        for one_lay in layname:
+            union += as_region(cell, one_lay)
+        return union
+    else:
+        try:
+            pya_layer = lys[layname]
+        except KeyError:
+            message(f'{layname} not found in layerset.')
+            return pya.Region()
+        return pya.Region(cell.shapes(pya_layer))
 
 
 _thread_count = None
