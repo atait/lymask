@@ -1,6 +1,7 @@
 import os, sys
 import subprocess
 import xmltodict
+from collections import OrderedDict
 
 import lymask
 from lymask import batch_drc_main
@@ -19,13 +20,30 @@ class DRC_difference(Exception):
 def assert_equal(rdb_file1, rdb_file2):
     ''' Errors if the rdbs are different.
         This is done with dictionaries not the XML text itself
-        Note, ordering of lists matters currently (although it shouldn't). Dict key order does not (appropriately).
+        Order should not matter, so we use frozenset. In order to sort, we need to hash dicts,
+        so we make frozendict. No need to mutate these, so it should be fine
     '''
+    class frozendict(dict):
+        def __hash__(self):
+            return hash(tuple(sorted(self.items())))
+        def __lt__(self, other):
+            return hash(self) < hash(other)
+
+    def strip_order(hierarchy):
+        if isinstance(hierarchy, (dict, OrderedDict)):
+            new_dict = {k: strip_order(v) for k,v in hierarchy.items()}
+            return frozendict(new_dict)
+        elif isinstance(hierarchy, (list, tuple)):
+            new_list = [strip_order(el) for el in hierarchy]
+            return frozenset(sorted(new_list))
+        else:
+            return hierarchy
+
     with open(rdb_file1, 'r') as fx:
         rdbspec1 = xmltodict.parse(fx.read(), process_namespaces=True)
     with open(rdb_file2, 'r') as fx:
         rdbspec2 = xmltodict.parse(fx.read(), process_namespaces=True)
-    if rdbspec1 != rdbspec2:
+    if strip_order(rdbspec1) != strip_order(rdbspec2):
         raise DRC_difference()
 
 
