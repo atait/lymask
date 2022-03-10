@@ -39,7 +39,7 @@ def set_threads(thread_count, tiles=2):
     if thread_count == 1:
         thread_count = None
     if thread_count is not None:
-        raise RuntumeError('Multicore support is acting up in latest klayout verstion. Set thread_count = 1 for now')
+        raise RuntimeError('Multicore support is acting up in latest klayout verstion. Set thread_count = 1 for now')
     _thread_count = thread_count
     _tiles = tiles
 
@@ -95,7 +95,7 @@ def fast_sized(input_region, xsize):
 def fast_space(input_region, spacing, angle=90):
     # if something goes wrong, you can fall back to regular here by uncommenting
     if _thread_count is None:
-        return input_region.space_check(spacing)
+        return input_region.space_check(spacing, False, pya.Region.Metrics.Euclidian, angle)
     else:
         output_edge_pairs = pya.Region()
         tp = pya.TilingProcessor()
