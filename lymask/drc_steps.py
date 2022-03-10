@@ -3,7 +3,7 @@ from functools import wraps
 from lygadgets import pya, isGUI, message, message_loud
 
 from lymask.utilities import lys, LayerSet, gui_view
-from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create, fast_space, turbo, Euclidian
+from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create, fast_width, fast_space, fast_separation, turbo, Euclidian
 
 
 all_drcfunc_dict = {}
@@ -56,7 +56,8 @@ def width(cell, rdb, layer, value, angle=90):
 
     # do it
     polys = as_region(cell, layer)
-    violations = polys.width_check(value / dbu, False, Euclidian, angle, None, None)
+    violations = fast_width(polys, value / dbu, angle)
+    # violations = polys.width_check(value / dbu, False, Euclidian, angle, None, None)
     # violations = turbo(polys, 'width_check', [value / dbu, False, Euclidian, angle, None, None],
     #                    tile_border=1.1*value, job_name='{}_Width'.format(layer))
     rdb_create(rdb, cell, rdb_category, violations)
@@ -85,8 +86,8 @@ def inclusion(cell, rdb, inner, outer, include):
     rin = as_region(cell, inner)
     rout = as_region(cell, outer)
     # violations = rin.sized(include / dbu) - rout
-    big_rin = turbo(rin, 'sized', include / dbu,
-                    tile_border=1.1*include, job_name='{} in {}'.format(inner, outer))
+    big_rin = fast_sized(rin, include / dbu)
+    # Note: this could be parallelized, but it is easier I think than sizing
     violations = big_rin - rout
 
     rdb_create(rdb, cell, rdb_category, violations)
@@ -100,8 +101,11 @@ def exclusion(cell, rdb, lay1, lay2, exclude):
     # do it
     r1 = as_region(cell, lay1)
     r2 = as_region(cell, lay2)
+    # r1.separation_check(r2, exclude / dbu)
+    too_close = fast_separation(r1, r2, exclude / dbu)
+    # This could be parallelized
     overlaps = r1 & r2
-    too_close = r1.separation_check(r2, exclude / dbu)
+
     rdb_create(rdb, cell, rdb_category, overlaps)
     rdb_create(rdb, cell, rdb_category, too_close)
 

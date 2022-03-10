@@ -1,6 +1,6 @@
 # YAML specification of a DRC process with lymask
 ---
--   processor: {thread_count: 1}
+-   processor: {thread_count: 2, tiles: 4}
 -   drcX:
       on_input: [v3, v5]
 -   width: {layer: wg_deep, value: 0.200, angle: 40}

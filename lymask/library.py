@@ -45,8 +45,6 @@ def set_threads(thread_count, tiles=2):
     global _thread_count, _tiles
     if thread_count == 1:
         thread_count = None
-    if thread_count is not None:
-        raise RuntimeError('Multicore support is acting up in latest klayout verstion. Set thread_count = 1 for now')
     _thread_count = thread_count
     _tiles = tiles
 
@@ -75,7 +73,8 @@ def fast_smoothed(unfiltered_region, deviation=0.1):
     tp.input('in1', temp_region)
     tp.output('out1', output_region)
     tp.queue("_output(out1, in1.smoothed({}))".format(deviation / dbu))
-    tp.tile_size(2000., 2000.)
+    # tp.tile_size(2000., 2000.)  # Not sure why this was here
+    tp.tiles(_tiles, _tiles)
     tp.tile_border(5 * deviation, 5 * deviation)
     tp.threads = _thread_count
     tp.execute('Smoothing job')
@@ -92,34 +91,69 @@ def fast_sized(input_region, xsize):
         tp.input('in1', input_region)
         tp.output('out1', output_region)
         tp.queue("_output(out1, in1.sized({}))".format(xsize))
-        tp.tile_size(2000., 2000.)
+        tp.tiles(_tiles, _tiles)
         tp.tile_border(2 * xsize, 2 * xsize)
         tp.threads = _thread_count
         tp.execute('Sizing job')
         return output_region
 
 
+def fast_width(input_region, width, angle=90):
+    # if something goes wrong, you can fall back to regular here by uncommenting
+    if _thread_count is None:
+        return input_region.width_check(width, False, Euclidian, angle)
+    else:
+        output_edge_pairs = pya.EdgePairs()
+        tp = pya.TilingProcessor()
+        tp.input('in1', input_region)
+        tp.output('out1', output_edge_pairs)
+        tp.queue("_output(out1, in1.width_check({}, false, Region.Euclidian, {}, nil, nil))".format(width, angle))
+
+        border = 1.1 * width
+        tp.tile_border(border, border)
+        tp.tiles(_tiles, _tiles)
+        tp.threads = _thread_count
+        tp.execute('Width check job')
+        return output_edge_pairs
+
+
 def fast_space(input_region, spacing, angle=90):
     # if something goes wrong, you can fall back to regular here by uncommenting
     if _thread_count is None:
-        return input_region.space_check(spacing, False, pya.Region.Metrics.Euclidian, angle)
+        return input_region.space_check(spacing, False, Euclidian, angle)
     else:
-        output_edge_pairs = pya.Region()
+        output_edge_pairs = pya.EdgePairs()
         tp = pya.TilingProcessor()
         tp.input('in1', input_region)
         tp.output('out1', output_edge_pairs)
         # tp.queue("_output(out1, in1.space_check({}))".format(spacing))
-        tp.queue("_output(out1, in1.space_check({}, false, nil, {}, nil, nil))".format(spacing, angle))
+        tp.queue("_output(out1, in1.space_check({}, false, Region.Euclidian, {}, nil, nil))".format(spacing, angle))
 
         border = 1.1 * spacing
         tp.tile_border(border, border)
         tp.tiles(_tiles, _tiles)
-        # bbox = input_region.bbox()
-        # die_wh = [bbox.width(), bbox.height()]
-        # tile_wh = [dim / _tiles for dim in die_wh]
-        # border_area = 2 * (tile_wh[0] + tile_wh[1]) * border
         tp.threads = _thread_count
-        tp.execute('Spacing job')
+        tp.execute('Spacing check job')
+        return output_edge_pairs
+
+
+def fast_separation(r1, r2, exclude):
+    # if something goes wrong, you can fall back to regular here by uncommenting
+    if _thread_count is None:
+        return r1.separation_check(r2, exclude)
+    else:
+        output_edge_pairs = pya.EdgePairs()
+        tp = pya.TilingProcessor()
+        tp.input('in1', r1)
+        tp.input('in2', r2)
+        tp.output('out1', output_edge_pairs)
+        tp.queue("_output(out1, in1.separation_check(in2, {}))".format(exclude))
+
+        border = 2 * exclude
+        tp.tile_border(border, border)
+        tp.tiles(_tiles, _tiles)
+        tp.threads = _thread_count
+        tp.execute('Separation check job')
         return output_edge_pairs
 
 
