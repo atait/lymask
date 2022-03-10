@@ -12,6 +12,13 @@ except AttributeError:
     dbu = .001
 
 
+# Metrics enum was added in v0.27
+try:
+    Euclidian = pya.Region.Euclidian
+except AttributeError:
+    Euclidian = pya.Region.Metrics.Euclidian
+
+
 def as_region(cell, layname):
     ''' Mostly a convenience brevity function.
         If a layer isn't in the layer set, return an empty region instead of crashing

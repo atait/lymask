@@ -3,7 +3,7 @@ from functools import wraps
 from lygadgets import pya, isGUI, message, message_loud
 
 from lymask.utilities import lys, LayerSet, gui_view
-from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create, fast_space, turbo
+from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create, fast_space, turbo, Euclidian
 
 
 all_drcfunc_dict = {}
@@ -56,8 +56,8 @@ def width(cell, rdb, layer, value, angle=90):
 
     # do it
     polys = as_region(cell, layer)
-    violations = polys.width_check(value / dbu, False, pya.Region.Metrics.Euclidian, angle, None, None)
-    # violations = turbo(polys, 'width_check', [value / dbu, False, pya.Region.Metrics.Euclidian, angle, None, None],
+    violations = polys.width_check(value / dbu, False, Euclidian, angle, None, None)
+    # violations = turbo(polys, 'width_check', [value / dbu, False, Euclidian, angle, None, None],
     #                    tile_border=1.1*value, job_name='{}_Width'.format(layer))
     rdb_create(rdb, cell, rdb_category, violations)
 
@@ -71,7 +71,7 @@ def space(cell, rdb, layer, value, angle=90):
     # do it
     polys = as_region(cell, layer)
     violations = fast_space(polys, value / dbu, angle)
-    # violations = turbo(polys, 'space_check', [value / dbu, False, pya.Region.Metrics.Euclidian, angle, None, None],
+    # violations = turbo(polys, 'space_check', [value / dbu, False, Euclidian, angle, None, None],
     #                    tile_border=1.1*value, job_name='{}_Space'.format(layer))
     rdb_create(rdb, cell, rdb_category, violations)
 
