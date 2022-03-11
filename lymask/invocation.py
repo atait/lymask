@@ -33,7 +33,7 @@ def _drc_main(layout, ymlfile, tech_obj=None):
     with open(ymlfile) as fx:
         step_list = yaml.load(fx, Loader=yaml.FullLoader)
     if func_info_to_func_and_kwargs(step_list[0])[0] != 'make_rdbcells':
-        step_list.insert(0, ['make_rdbcells'])
+        step_list.insert(0, 'make_rdbcells')
     reload_lys(tech_obj, dataprep=True)
     # assert_valid_drc_steps(step_list)
 

@@ -93,6 +93,7 @@ def func_info_to_func_and_kwargs(func_info):
         kwargs = dict()
     elif isinstance(func_info, list):
         message('Deprecation warning: spefifying a step as a list is going to go. Use dicts.')
+        message(func_info)
         func_name = func_info[0]
         if len(func_info) == 1:
             kwargs = dict()

@@ -17,6 +17,13 @@ def drcStep(step_fun):
 
 
 @drcStep
+def flatten(cell, rdb):
+    if isGUI():
+        message_loud('Warning: The flattening step modifies the layout, so be careful about saving.')
+    cell.flatten(True)
+
+
+@drcStep
 def make_rdbcells(cell, rdb):
     rdb.topcell = cell.name
     rdb_cell = rdb.create_cell(cell.name)
