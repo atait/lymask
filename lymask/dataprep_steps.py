@@ -79,11 +79,23 @@ def check_floorplan(cell, fp_safe=50):
         cell.shapes(lys.FLOORPLAN).insert(fp_box)
 
 
+__warned_about_flattening = False
 @dpStep
 def flatten(cell):
-    if isGUI():
+    global __warned_about_flattening
+    if isGUI() and not __warned_about_flattening:
         message_loud('Warning: The flattening step modifies the layout, so be careful about saving.')
+        __warned_about_flattening = True
     cell.flatten(True)
+
+
+@dpStep
+def paths_to_polys(cell):
+    for layname in lys.keys():
+        lay = lys[layname]
+        for shape in cell.each_shape(lay):
+            if shape.is_path():
+                shape.polygon = shape.simple_polygon
 
 
 @dpStep

@@ -17,11 +17,12 @@ def drcStep(step_fun):
 
 
 @drcStep
-def flatten(cell, rdb):
-    if isGUI():
+def flatten(cell):
+    global __warned_about_flattening
+    if isGUI() and not __warned_about_flattening:
         message_loud('Warning: The flattening step modifies the layout, so be careful about saving.')
+        __warned_about_flattening = True
     cell.flatten(True)
-
 
 @drcStep
 def make_rdbcells(cell, rdb):
