@@ -81,6 +81,8 @@ def check_floorplan(cell, fp_safe=50):
 
 @dpStep
 def flatten(cell):
+    if isGUI():
+        message_loud('Warning: The flattening step modifies the layout, so be careful about saving.')
     cell.flatten(True)
 
 

@@ -4,7 +4,7 @@
 from __future__ import division, print_function, absolute_import
 import os
 import yaml
-from lygadgets import pya, message, Technology
+from lygadgets import pya, message, message_loud, Technology
 
 from lymask.utilities import gui_view, gui_active_layout, gui_window, gui_active_technology, \
                              active_technology, set_active_technology, \
@@ -25,7 +25,11 @@ def _main(layout, ymlfile, tech_obj=None):
         func = all_dpfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             # call it
-            func(layout.cell(TOP_ind), **kwargs)
+            try:
+                func(layout.cell(TOP_ind), **kwargs)
+            except Exception as err:
+                message_loud(str(err))
+                raise
     return layout
 
 
@@ -45,7 +49,11 @@ def _drc_main(layout, ymlfile, tech_obj=None):
         message('lymask doing {}: {}'.format(func_name, kwargs))
         func = all_drcfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
-            func(layout.cell(TOP_ind), rdb, **kwargs)
+            try:
+                func(layout.cell(TOP_ind), rdb, **kwargs)
+            except Exception as err:
+                message_loud(str(err))
+                raise
     return rdb
 
 
@@ -81,7 +89,7 @@ def gui_drc_main(ymlfile=None):
 def batch_main(infile, ymlspec=None, technology=None, outfile=None):
     # covers everything that is not GUI
     if outfile is None:
-        outfile = infile[:-4] + '_proc.gds'
+        outfile = infile[:-4] + '_proc.oas'
     # Load it
     layout = pya.Layout()
     layout.read(infile)
