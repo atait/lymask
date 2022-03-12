@@ -16,8 +16,9 @@ def drcStep(step_fun):
     return step_fun
 
 
+__warned_about_flattening = False
 @drcStep
-def flatten(cell):
+def flatten(cell, rdb):
     global __warned_about_flattening
     if isGUI() and not __warned_about_flattening:
         message_loud('Warning: The flattening step modifies the layout, so be careful about saving.')
