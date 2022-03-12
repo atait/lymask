@@ -8,7 +8,7 @@ def readme():
 
 
 setup(name='lymask',
-      version='0.1.7',
+      version='0.1.8',
       description='Mask dataprep with klayout',
       long_description=readme(),
       author='Alex Tait, Adam McCaughan, Sonia Buckley, Jeff Chiles, Jeff Shainline, Rich Mirin, Sae Woo Nam',
