@@ -53,13 +53,11 @@ def drcX(cell, rdb, on_input=[], on_output=[], none=None):
         post_exclude = pre_exclude - as_region(cell, 'DRC_exclude')
         cell.clear(lys[layer])
         cell.shapes(lys[layer]).insert(post_exclude)
-    for layer in on_output:
-        pass  # good job you picked the default
 
 
 @drcStep
 def width(cell, rdb, layer, value, angle=90):
-    rdb_category = rdb.create_category('{}_Width'.format(layer))
+    rdb_category = rdb.create_category(f'{layer}_Width')
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature width violation'.format(layer, value)
     # message_loud('lymask doing {}'.format(rdb_category.name()))
 
@@ -74,7 +72,7 @@ def width(cell, rdb, layer, value, angle=90):
 
 @drcStep
 def space(cell, rdb, layer, value, angle=90):
-    rdb_category = rdb.create_category('{}_Space'.format(layer))
+    rdb_category = rdb.create_category(f'{layer}_Space')
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature spacing violation'.format(layer, value)
     # message_loud('lymask doing {}'.format(rdb_category.name()))
 
@@ -88,7 +86,7 @@ def space(cell, rdb, layer, value, angle=90):
 
 @drcStep
 def inclusion(cell, rdb, inner, outer, include):
-    rdb_category = rdb.create_category('{} in {}'.format(inner, outer))
+    rdb_category = rdb.create_category(f'{inner} in {outer}')
     rdb_category.description = '{} in {} [{:1.3f} um] - Minimum inclusion violation'.format(inner, outer, include)
 
     # do it
@@ -104,7 +102,7 @@ def inclusion(cell, rdb, inner, outer, include):
 
 @drcStep
 def exclusion(cell, rdb, lay1, lay2, exclude):
-    rdb_category = rdb.create_category('{} from {}'.format(lay1, lay2))
+    rdb_category = rdb.create_category(f'{lay1} from {lay2}')
     rdb_category.description = '{} from {} [{:1.3f} um] - Minimum exclusion violation'.format(lay1, lay2, exclude)
 
     # do it
@@ -128,5 +126,6 @@ def assert_valid_drc_steps(step_list):
         try:
             func = all_drcfunc_dict[func_info[0]]
         except KeyError as err:
-            message_loud('Function "{}" not supported. Available are {}'.format(func_info[0], all_drcfunc_dict.keys()))
+            message_loud(f'Function "{func_info[0]}" not supported. Available are {all_drcfunc_dict.keys()}')
+
             raise

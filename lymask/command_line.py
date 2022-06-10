@@ -1,5 +1,6 @@
 ''' Command line entry points for dataprep and drc
 '''
+
 import argparse
 from lymask import __version__
 import textwrap
@@ -16,7 +17,7 @@ top_parser = argparse.ArgumentParser(
         '''))
 top_parser.add_argument('command', type=str, choices=['dataprep', 'drc'], metavar='<command>')
 top_parser.add_argument('args', nargs=argparse.REMAINDER)
-top_parser.add_argument('-v', '--version', action='version', version='%(prog)s v{}'.format(__version__))
+top_parser.add_argument('-v', '--version', action='version', version=f'%(prog)s v{__version__}')
 
 def cm_main():
     args = top_parser.parse_args()

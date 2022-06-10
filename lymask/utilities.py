@@ -11,15 +11,15 @@ def active_technology():
     global _active_technology
     if isGUI():
         return gui_active_technology()
-    else:
-        if _active_technology is None:
-            _active_technology = Technology.technology_by_name(klayout_last_open_technology())
-        return _active_technology
+    if _active_technology is None:
+        _active_technology = Technology.technology_by_name(klayout_last_open_technology())
+    return _active_technology
 
 
 def set_active_technology(tech_name):
     if not Technology.has_technology(tech_name):
-        raise ValueError('Technology not found. Available are {}'.format(Technology.technology_names()))
+        raise ValueError(f'Technology not found. Available are {Technology.technology_names()}')
+
     if isGUI() and tech_name != gui_active_technology().name:
         raise RuntimeError('Cannot set technology via lymask while in GUI')
     global _active_technology
@@ -46,8 +46,7 @@ def tech_dataprep_layer_properties(pya_tech=None):
         for filename in filenames:
             if filename.endswith('.lyp'):
                 return os.path.join(root, filename)
-    else:
-        return tech_layer_properties()
+    return tech_layer_properties()
 
 
 def gui_window():
@@ -79,8 +78,7 @@ def gui_active_cell():
 
 def gui_active_technology():
     technology = gui_window().initial_technology  # gets the technology from the selection menu
-    tech_obj = Technology.technology_by_name(technology)
-    return tech_obj
+    return Technology.technology_by_name(technology)
 
 
 def func_info_to_func_and_kwargs(func_info):
@@ -90,25 +88,28 @@ def func_info_to_func_and_kwargs(func_info):
     '''
     if isinstance(func_info, str):
         func_name = func_info
-        kwargs = dict()
+        kwargs = {}
     elif isinstance(func_info, list):
         message('Deprecation warning: spefifying a step as a list is going to go. Use dicts.')
         message(func_info)
         func_name = func_info[0]
         if len(func_info) == 1:
-            kwargs = dict()
+            kwargs = {}
         elif len(func_info) == 2:
             kwargs = func_info[1]
         else:
-            raise TypeError('Function not specified correctly as a list (needs two elements): {}'.format(func_info))
+            raise TypeError(f'Function not specified correctly as a list (needs two elements): {func_info}')
+
     elif isinstance(func_info, dict):
         if len(func_info.keys()) != 1:
-            raise TypeError('Function not specified correctly as a dictionary (needs one key): {}'.format(func_info))
+            raise TypeError(f'Function not specified correctly as a dictionary (needs one key): {func_info}')
+
         for k, v in func_info.items():
             func_name = k
             kwargs = v
     else:
-        raise TypeError('Function not specified correctly. Need str, list, dict: {}'.format(func_info))
+        raise TypeError(f'Function not specified correctly. Need str, list, dict: {func_info}')
+
     return func_name, kwargs
 
 
@@ -175,9 +176,9 @@ class LayerSet(dict):
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):
-            raise TypeError('Key must be string. Got {}.'.format(type(key)))
+            raise TypeError(f'Key must be string. Got {type(key)}.')
         if not isinstance(value, pya.LayerInfo):
-            raise TypeError('Value must be pya.LayerInfo. Got {}.'.format(type(value)))
+            raise TypeError(f'Value must be pya.LayerInfo. Got {type(value)}.')
         if not value.is_named():
             value.name = key
         dict.__setitem__(self, key, value)
@@ -204,7 +205,7 @@ class LayerSet(dict):
         ''' When doubles_ok is True and there is a collision, the other takes precedence '''
         for layname in other.keys():
             if layname in self.keys() and not doubles_ok:
-                raise ValueError('Layer is doubly defined: {}'.format(layname))
+                raise ValueError(f'Layer is doubly defined: {layname}')
             self[layname] = other.get_as_LayerInfo(layname)
 
     def appendFile(self, filename, doubles_ok=False):
@@ -224,11 +225,7 @@ def name2shortName(name_str):
     if name_str is None:
         raise IOError('This layer has no name')
     components = name_str.split(' - ')
-    if len(components) > 1:
-        short_name = components[1]
-    else:
-        short_name = components[0]
-    return short_name
+    return components[1] if len(components) > 1 else components[0]
 
 
 def source2pyaLayerInfo(source_str):
@@ -250,7 +247,8 @@ def reload_lys(technology=None, clear=False, dataprep=False):
 
     if clear: lys.clear()
     try:
-        lyp_file = tech_layer_properties(technology) if not dataprep else tech_dataprep_layer_properties(technology)
+        lyp_file = tech_dataprep_layer_properties(technology) if dataprep else tech_layer_properties(technology)
+
         lys.appendFile(lyp_file, doubles_ok=True)
     except (FileNotFoundError, AttributeError):
         message_loud('No lyp file found. Likely that technology hasn\'t loaded yet, or you don\'t have the standalone klayout')
