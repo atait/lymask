@@ -28,19 +28,29 @@ def set_active_technology(tech_name):
 # end deprecation
 
 
+def resolve_pya_tech(pya_tech_or_name=None):
+    if pya_tech_or_name is None:
+        pya_tech = active_technology()
+    elif isinstance(pya_tech_or_name, str):
+        pya_tech = Technology.technology_by_name(pya_tech_or_name)
+    elif isinstance(pya_tech_or_name, Technology):
+        pya_tech = pya_tech_or_name
+    else:
+        raise TypeError(f'Cannot recognize {pya_tech_or_name} as an installed KLayout technology')
+    return pya_tech
+
+
 def tech_layer_properties(pya_tech=None):
     ''' Returns the file containing the main layer properties
     '''
-    if pya_tech is None:
-        pya_tech = active_technology()
+    pya_tech = resolve_pya_tech(pya_tech)
     return pya_tech.eff_path(pya_tech.eff_layer_properties_file())
 
 
 def tech_dataprep_layer_properties(pya_tech=None):
     ''' Returns the file containing the dataprep layer properties
     '''
-    if pya_tech is None:
-        pya_tech = active_technology()
+    pya_tech = resolve_pya_tech(pya_tech)
     dataprep_path = pya_tech.eff_path('dataprep')
     for root, dirnames, filenames in os.walk(dataprep_path, followlinks=True):
         for filename in filenames:
@@ -111,6 +121,8 @@ def func_info_to_func_and_kwargs(func_info):
         raise TypeError('Function not specified correctly. Need str, list, dict: {}'.format(func_info))
     return func_name, kwargs
 
+
+# --- Reading lyp files
 
 class LayerSet(dict):
     ''' getitem returns the logical layer (integer) that can be used in pya functions,
