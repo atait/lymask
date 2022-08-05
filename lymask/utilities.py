@@ -1,7 +1,23 @@
 from __future__ import division, print_function, absolute_import
 import os
+import yaml
 from lygadgets import isGUI, pya, message, message_loud, lyp_to_layerlist, patch_environment
 from lygadgets.technology import Technology, klayout_last_open_technology
+
+
+class objview(dict):
+    ''' Supports both key and dot access/assignment '''
+    __slots__ = ()
+
+    def __getattr__(self, key):
+        return self.__getitem__(key)
+    def __setattr__(self, key, val):
+        return self.__setitem__(key, val)
+    def copy(self):
+        return objview(super().copy())
+    def deepcopy(self):
+        return objview(deepcopy(self))
+
 
 #: This global variable to be deprecated
 _active_technology = None
@@ -280,3 +296,68 @@ def reload_lys(technology=None, clear=False, dataprep=False):
 
 # reload_lys()
 
+
+# --- Reading drc (yml) files
+
+def tech_drc_properties(pya_tech=None, drc_filename=None):
+    ''' Returns the file containing the dataprep layer properties
+    '''
+    pya_tech = resolve_pya_tech(pya_tech)
+    drc_path = pya_tech.eff_path('drc')
+    all_yml_files = []
+    for root, dirnames, filenames in os.walk(drc_path, followlinks=True):
+        for filename in filenames:
+            if filename.endswith('.yml'):
+                all_yml_files.append(os.path.join(root, filename))
+    if len(all_yml_files) == 0:
+        raise FileNotFoundError('No files matching drc/*.yml were found')
+    if drc_filename is not None:
+        if not '.' in drc_filename:
+            drc_filename += '.yml'
+        full_specified_path = os.path.join(root, drc_filename)
+        if full_specified_path not in all_yml_files:
+            raise FileNotFoundError(f'{len(all_yml_files)} yml files were found, but not {drc_filename}')
+        return full_specified_path
+    elif len(all_yml_files) > 1:
+        all_bases = [os.path.basename(file) for file in all_yml_files]
+        raise ValueError(f'Ambiguous DRC spec. Multiple found, so need to specify one: \n' + '\n'.join(all_bases))
+    else:
+        return all_yml_files[0]
+
+
+def get_design_rules(pya_tech=None, drc_filename=None):
+    ''' Access these like x = dr.width.RIB '''
+    full_drc_path = tech_drc_properties(pya_tech, drc_filename)
+    with open(full_drc_path, 'r') as fx:
+        top_dict = yaml.load(fx, Loader=yaml.FullLoader)
+    result_dict = objview(width=objview(), space=objview(), inclusion=objview(), exclusion=objview())
+    for rule_info in top_dict:
+        rule_name, subrule = func_info_to_func_and_kwargs(rule_info)
+        if rule_name == 'width':
+            result_dict.width[subrule['layer']] = float(subrule['value'])
+        elif rule_name == 'space':
+            result_dict.space[subrule['layer']] = float(subrule['value'])
+        elif rule_name == 'inclusion':
+            inners = subrule['inner']
+            if not isinstance(inners, list):
+                inners = [inners]
+            outers = subrule['outer']
+            if not isinstance(outers, list):
+                outers = [outers]
+            for inn in inners:
+                for out in outers:
+                    result_dict.inclusion[inn + '_' + out] = float(subrule['include'])
+        elif rule_name == 'exclusion':
+            lay1s = subrule['lay1']
+            if not isinstance(lay1s, list):
+                lay1s = [lay1s]
+            lay2s = subrule['lay2']
+            if not isinstance(lay2s, list):
+                lay2s = [lay2s]
+            for la1 in lay1s:
+                for la2 in lay2s:
+                    result_dict.exclusion[la1 + '_' + la2] = float(subrule['exclude'])
+                    result_dict.exclusion[la2 + '_' + la1] = float(subrule['exclude'])
+        else:
+            pass
+    return result_dict
