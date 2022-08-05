@@ -49,7 +49,7 @@ def resolve_pya_tech(pya_tech_or_name=None):
         pya_tech = active_technology()
     elif isinstance(pya_tech_or_name, str):
         pya_tech = Technology.technology_by_name(pya_tech_or_name)
-    elif isinstance(pya_tech_or_name, Technology):
+    elif isinstance(pya_tech_or_name, pya.Technology):
         pya_tech = pya_tech_or_name
     else:
         raise TypeError(f'Cannot recognize {pya_tech_or_name} as an installed KLayout technology')
