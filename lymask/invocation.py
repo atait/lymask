@@ -21,7 +21,7 @@ def _main(layout, ymlfile, tech_obj=None):
     assert_valid_dataprep_steps(step_list)
     for func_info in step_list:
         func_name, kwargs = func_info_to_func_and_kwargs(func_info)
-        message('lymask doing {}: {}'.format(func_name, kwargs))
+        message(f'lymask doing {func_name}: {kwargs}')
         func = all_dpfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             # call it
@@ -41,12 +41,12 @@ def _drc_main(layout, ymlfile, tech_obj=None):
     reload_lys(tech_obj, dataprep=True)
     # assert_valid_drc_steps(step_list)
 
-    rdb = pya.ReportDatabase('DRC: {}'.format(os.path.basename(ymlfile)))
-    rdb.description = 'DRC: {}'.format(os.path.basename(ymlfile))
+    rdb = pya.ReportDatabase(f'DRC: {os.path.basename(ymlfile)}')
+    rdb.description = f'DRC: {os.path.basename(ymlfile)}'
 
     for func_info in step_list:
         func_name, kwargs = func_info_to_func_and_kwargs(func_info)
-        message('lymask doing {}: {}'.format(func_name, kwargs))
+        message(f'lymask doing {func_name}: {kwargs}')
         func = all_drcfunc_dict[func_name]
         for TOP_ind in layout.each_top_cell():
             try:
@@ -89,7 +89,7 @@ def gui_drc_main(ymlfile=None):
 def batch_main(infile, ymlspec=None, technology=None, outfile=None):
     # covers everything that is not GUI
     if outfile is None:
-        outfile = infile[:-4] + '_proc.oas'
+        outfile = f'{infile[:-4]}_proc.oas'
     # Load it
     layout = pya.Layout()
     layout.read(infile)
@@ -105,7 +105,7 @@ def batch_main(infile, ymlspec=None, technology=None, outfile=None):
 def batch_drc_main(infile, ymlspec=None, technology=None, outfile=None):
     # covers everything that is not GUI
     if outfile is None:
-        outfile = infile[:-4] + '.lyrdb'
+        outfile = f'{infile[:-4]}.lyrdb'
     # Load it
     layout = pya.Layout()
     layout.read(infile)
@@ -135,7 +135,7 @@ def resolve_ymlspec(ymlspec=None, technology=None, category='dataprep'):
             set_active_technology(technology)
         tech_obj = active_technology()
         if technology is None:
-            message('Using the last used technology: {}'.format(tech_obj.name))
+            message(f'Using the last used technology: {tech_obj.name}')
     else:
         # Option 2: search within a specified technology
         if technology is None:
@@ -151,5 +151,5 @@ def resolve_ymlspec(ymlspec=None, technology=None, category='dataprep'):
             ymlspec += '.yml'
         ymlfile = tech_obj.eff_path(os.path.join(category, ymlspec))
     if not os.path.isfile(ymlfile):
-        raise FileNotFoundError('Could not resolve YAML specification: {}'.format(ymlspec))
+        raise FileNotFoundError(f'Could not resolve YAML specification: {ymlspec}')
     return ymlfile

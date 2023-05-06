@@ -48,14 +48,12 @@ def add_library(cell, filename):
     ''' Imports from the filename, which is a path to a python file.
         Anything within there that is a dpStep gets added to the all_dpfunc_dict for later
     '''
-    if os.path.isfile(filename):
-        pass
-    else:
+    if not os.path.isfile(filename):
         dataprep_relpath = os.path.join(active_technology().eff_path('dataprep'), filename)
         if os.path.isfile(dataprep_relpath):
             filename = os.path.realpath(dataprep_relpath)
         else:
-            raise FileNotFoundError('lymask could not find {}'.format(filename))
+            raise FileNotFoundError(f'lymask could not find {filename}')
     modulename = os.path.splitext(os.path.basename(filename))[0]
     spec = importlib.util.spec_from_file_location(modulename, filename)
     foo = importlib.util.module_from_spec(spec)
@@ -243,7 +241,7 @@ def metal_pedestal(cell, pedestal_layer='wg_full_photo', offset=0, keepout=None)
     cell.shapes(lys[pedestal_layer]).insert(pedestal_region)
 
 
-has_precomped = dict()
+has_precomped = {}
 @dpStep
 def precomp(cell, **kwargs):
     '''
@@ -260,13 +258,12 @@ def precomp(cell, **kwargs):
         # do a check for repeated precomp
         if cell in has_precomped.keys():
             if layer_name in has_precomped[cell]:
-                pya.MessageBox.info('Dataprep precomp', 'Warning: precompensating {} twice. '.format(layer_name) + '(in this process)\n'
-                                    'If the last precomp was not undone with Ctrl-Z, this will turn out wrong', pya.MessageBox.Ok)
-                pass#raise RuntimeError('At this time, precomp cannot be run twice on the same layer.')
+                pya.MessageBox.info('Dataprep precomp', (f'Warning: precompensating {layer_name} twice. ' + '(in this process)\n' 'If the last precomp was not undone with Ctrl-Z, this will turn out wrong'), pya.MessageBox.Ok)
+
             else:
                 has_precomped[cell].add(layer_name)
         else:
-            has_precomped[cell] = set([layer_name])
+            has_precomped[cell] = {layer_name}
 
         # size the layer in place
         bias = bias_um / dbu
@@ -284,15 +281,13 @@ def mask_map(cell, **kwargs):
         There is a problem if you have 101 defined in your file and then another layer that is not defined.
     '''
     assert_valid_mask_map(kwargs)
-    # If we need to make new layers,
-    new_mask_index = 0
     available_mask_layers = list(range(100, 200))
     for occupied_layer in lys.values():
         if occupied_layer.layer in available_mask_layers:
             available_mask_layers.remove(occupied_layer.layer)
     # merging and moving to new layers
-    for dest_layer, src_layers in kwargs.items():
-        if not dest_layer in lys.keys():
+    for new_mask_index, (dest_layer, src_layers) in enumerate(kwargs.items()):
+        if dest_layer not in lys.keys():
             new_layinfo = pya.LayerInfo(available_mask_layers[new_mask_index], 0, dest_layer)
             lys[dest_layer] = new_layinfo
             cell.layout().layer(new_layinfo)
@@ -301,7 +296,6 @@ def mask_map(cell, **kwargs):
             src_layers = [src_layers]
         for src in src_layers:
             cell.copy(lys[src], lys[dest_layer])
-        new_mask_index += 1
 
 
 def assert_valid_mask_map(mapping):
@@ -309,8 +303,7 @@ def assert_valid_mask_map(mapping):
         try:
             lys[dest_layer]
         except KeyError as err:
-            message_loud('Warning: Destination layer [{}] not found in mask layerset. We will make it...'.format(dest_layer))
-            pass  # This is allowed
+            message_loud(f'Warning: Destination layer [{dest_layer}] not found in mask layerset. We will make it...')
 
         if not isinstance(src_layers, list):
             src_layers = [src_layers]
@@ -318,7 +311,8 @@ def assert_valid_mask_map(mapping):
             try:
                 lys[src]
             except KeyError as err:
-                message_loud('Error: Source layer [{}] not found in existing designer or dataprep layerset.'.format(src))
+                message_loud(f'Error: Source layer [{src}] not found in existing designer or dataprep layerset.')
+
                 raise
 
 
@@ -347,9 +341,9 @@ def clear_nonmask(cell):
     '''
     for any_layer in lys.keys():
         lay = lys[any_layer]
-        is_mask = (100 <= lay and lay < 200) or any_layer == 'FLOORPLAN'
+        is_mask = 100 <= lay < 200 or any_layer == 'FLOORPLAN'
         if not is_mask:
-            cell.clear(lys[any_layer])
+            cell.clear(lay)
 
 
 @dpStep
@@ -399,7 +393,8 @@ def assert_valid_dataprep_steps(step_list):
         try:
             func = all_dpfunc_dict[func_info_to_func_and_kwargs(func_info)[0]]
         except KeyError as err:
-            message_loud('Function "{}" not supported. Available are {}'.format(func_info[0], all_dpfunc_dict.keys()))
+            message_loud(f'Function "{func_info[0]}" not supported. Available are {all_dpfunc_dict.keys()}')
+
             raise
 
         # check mask layers

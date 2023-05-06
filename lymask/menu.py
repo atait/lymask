@@ -35,8 +35,8 @@ def _gen_new_action(func):
         This function will create functions and action triggers correctly
     '''
     global item_counter
-    item_str = 'action_item%s' % item_counter
-    func_str = 'action_function%s' % item_counter
+    item_str = f'action_item{item_counter}'
+    func_str = f'action_function{item_counter}'
     globals()[item_str] = pya.Action()
     globals()[func_str] = func
     globals()[item_str].on_triggered = globals()[func_str]
@@ -65,13 +65,13 @@ def dataprep_yml_to_menu(dataprep_file, menu_path='lymask_menu.dataprep'):
         action = _gen_dataprep_action(dataprep_file)
     elif menu_path.endswith('drc'):
         action = _gen_drc_action(dataprep_file)
-    action.title = 'Run {}.yml'.format(subloop_name)
+    action.title = f'Run {subloop_name}.yml'
     if subloop_name == 'default':
         # action.shortcut = 'Shift+Ctrl+P'
-        menu.insert_separator(menu_path + '.begin', 'SEP')
-        menu.insert_item(menu_path + '.begin', subloop_name, action)
+        menu.insert_separator(f'{menu_path}.begin', 'SEP')
+        menu.insert_item(f'{menu_path}.begin', subloop_name, action)
     else:
-        menu.insert_item(menu_path + '.end', subloop_name, action)
+        menu.insert_item(f'{menu_path}.end', subloop_name, action)
 
 
 def reload_lymask_menu(category='dataprep', tech_name=None):
@@ -92,6 +92,6 @@ def reload_lymask_menu(category='dataprep', tech_name=None):
     for item in menu.items(menu_path):
         menu.delete_item(item)
     # insert new ones
-    for ymlfile in glob.iglob(ymlfile_dir + '/*.yml'):
+    for ymlfile in glob.iglob(f'{ymlfile_dir}/*.yml'):
         dataprep_yml_to_menu(ymlfile, menu_path=menu_path)
 
