@@ -3,7 +3,7 @@ import os
 import yaml
 from lygadgets import isGUI, pya, message, message_loud, lyp_to_layerlist, patch_environment
 from lygadgets.technology import Technology, klayout_last_open_technology
-from lygadgets.gui_objects import gui_active_technology
+from lygadgets.gui_objects import gui_view, gui_active_technology
 
 
 class objview(dict):

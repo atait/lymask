@@ -49,6 +49,7 @@ def _gen_dataprep_action(dataprep_file):
         gui_main(dataprep_file)
     return _gen_new_action(wrapped)
 
+
 def _gen_drc_action(drc_file):
     def wrapped():
         gui_drc_main(drc_file)
