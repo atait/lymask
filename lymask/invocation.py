@@ -6,8 +6,8 @@ import os
 import yaml
 from lygadgets import pya, message, message_loud, Technology
 
-from lymask.utilities import gui_view, gui_active_layout, gui_window, gui_active_technology, \
-                             active_technology, set_active_technology, \
+from lygadgets.gui_objects import gui_view, gui_active_layout, gui_window, gui_active_technology
+from lymask.utilities import active_technology, set_active_technology, \
                              tech_layer_properties, \
                              lys, reload_lys, func_info_to_func_and_kwargs
 from lymask.dataprep_steps import all_dpfunc_dict, assert_valid_dataprep_steps

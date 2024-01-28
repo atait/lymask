@@ -3,6 +3,7 @@ import os
 import yaml
 from lygadgets import isGUI, pya, message, message_loud, lyp_to_layerlist, patch_environment
 from lygadgets.technology import Technology, klayout_last_open_technology
+from lygadgets.gui_objects import gui_active_technology
 
 
 class objview(dict):
@@ -74,39 +75,6 @@ def tech_dataprep_layer_properties(pya_tech=None):
                 return os.path.join(root, filename)
     else:
         return tech_layer_properties()
-
-
-def gui_window():
-    patch_environment()  # makes sure the Application attribute gets spoofed into the standalone
-    import pya
-    return pya.Application.instance().main_window()
-
-
-def gui_view():
-    lv = gui_window().current_view()
-    if lv is None:
-        raise UserWarning("No view selected. Make sure you have an open layout.")
-    return lv
-
-
-def gui_active_layout():
-    ly = gui_view().active_cellview().layout()
-    if ly is None:
-        raise UserWarning("No layout. Make sure you have an open layout.")
-    return ly
-
-
-def gui_active_cell():
-    cell = gui_view().active_cellview().cell
-    if cell is None:
-        raise UserWarning("No cell. Make sure you have an open layout.")
-    return cell
-
-
-def gui_active_technology():
-    technology = gui_window().initial_technology  # gets the technology from the selection menu
-    tech_obj = Technology.technology_by_name(technology)
-    return tech_obj
 
 
 def func_info_to_func_and_kwargs(func_info):

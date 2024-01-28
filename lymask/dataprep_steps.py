@@ -5,8 +5,9 @@ import importlib.util
 
 from lygadgets import pya, isGUI, message, message_loud
 from lygadgets import anyCell_to_anyCell
+from lygadgets.gui_objects import gui_view
 
-from lymask.utilities import lys, LayerSet, gui_view, active_technology, func_info_to_func_and_kwargs
+from lymask.utilities import lys, LayerSet, active_technology, func_info_to_func_and_kwargs
 from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads
 
 

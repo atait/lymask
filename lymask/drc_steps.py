@@ -1,8 +1,9 @@
 from __future__ import division, print_function, absolute_import
 from functools import wraps
 from lygadgets import pya, isGUI, message, message_loud
+from lygadgets.gui_objects import gui_view
 
-from lymask.utilities import lys, LayerSet, gui_view
+from lymask.utilities import lys, LayerSet
 from lymask.library import dbu, as_region, fast_sized, fast_smoothed, set_threads, rdb_create, fast_width, fast_space, fast_separation, turbo, Euclidian
 
 
