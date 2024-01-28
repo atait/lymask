@@ -58,14 +58,14 @@ def drcX(cell, rdb, on_input=[], on_output=[], none=None):
 
 
 @drcStep
-def width(cell, rdb, layer, value, angle=90):
+def width(cell, rdb, layer, value, angle=90, min_projection=0):
     rdb_category = rdb.create_category('{}_Width'.format(layer))
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature width violation'.format(layer, value)
     # message_loud('lymask doing {}'.format(rdb_category.name()))
 
     # do it
     polys = as_region(cell, layer)
-    violations = fast_width(polys, value / dbu, angle)
+    violations = fast_width(polys, value / dbu, angle, min_projection / dbu)
     # violations = polys.width_check(value / dbu, False, Euclidian, angle, None, None)
     # violations = turbo(polys, 'width_check', [value / dbu, False, Euclidian, angle, None, None],
     #                    tile_border=1.1*value, job_name='{}_Width'.format(layer))
@@ -73,14 +73,14 @@ def width(cell, rdb, layer, value, angle=90):
 
 
 @drcStep
-def space(cell, rdb, layer, value, angle=90):
+def space(cell, rdb, layer, value, angle=90, min_projection=0):
     rdb_category = rdb.create_category('{}_Space'.format(layer))
     rdb_category.description = '{} [{:1.3f} um] - Minimum feature spacing violation'.format(layer, value)
     # message_loud('lymask doing {}'.format(rdb_category.name()))
 
     # do it
     polys = as_region(cell, layer)
-    violations = fast_space(polys, value / dbu, angle)
+    violations = fast_space(polys, value / dbu, angle, min_projection / dbu)
     # violations = turbo(polys, 'space_check', [value / dbu, False, Euclidian, angle, None, None],
     #                    tile_border=1.1*value, job_name='{}_Space'.format(layer))
     rdb_create(rdb, cell, rdb_category, violations)

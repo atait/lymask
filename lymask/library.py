@@ -15,8 +15,10 @@ except AttributeError:
 # Metrics enum was added in v0.27
 try:
     Euclidian = pya.Region.Euclidian
+    Projection = pya.Region.Projection
 except AttributeError:
     Euclidian = pya.Region.Metrics.Euclidian
+    Projection = pya.Region.Metrics.Projection
 
 
 def as_region(cell, layname):
@@ -98,16 +100,18 @@ def fast_sized(input_region, xsize):
         return output_region
 
 
-def fast_width(input_region, width, angle=90):
+def fast_width(input_region, width, angle=90, min_projection=0):
     # if something goes wrong, you can fall back to regular here by uncommenting
     if _thread_count is None:
-        return input_region.width_check(width, False, Euclidian, angle)
+        return input_region.width_check(width, False, Projection, angle)
     else:
         output_edge_pairs = pya.EdgePairs()
         tp = pya.TilingProcessor()
         tp.input('in1', input_region)
         tp.output('out1', output_edge_pairs)
-        tp.queue("_output(out1, in1.width_check({}, false, Region.Euclidian, {}, nil, nil))".format(width, angle))
+        if min_projection is None or min_projection == 0:
+            min_projection = 'nil'
+        tp.queue("_output(out1, in1.width_check({}, false, Region.Projection, {}, {}, nil))".format(width, angle, min_projection))
 
         border = 1.1 * width
         tp.tile_border(border, border)
@@ -117,17 +121,19 @@ def fast_width(input_region, width, angle=90):
         return output_edge_pairs
 
 
-def fast_space(input_region, spacing, angle=90):
+def fast_space(input_region, spacing, angle=90, min_projection=0):
     # if something goes wrong, you can fall back to regular here by uncommenting
     if _thread_count is None:
-        return input_region.space_check(spacing, False, Euclidian, angle)
+        return input_region.space_check(spacing, False, Projection, angle, min_projection)
     else:
         output_edge_pairs = pya.EdgePairs()
         tp = pya.TilingProcessor()
         tp.input('in1', input_region)
         tp.output('out1', output_edge_pairs)
         # tp.queue("_output(out1, in1.space_check({}))".format(spacing))
-        tp.queue("_output(out1, in1.space_check({}, false, Region.Euclidian, {}, nil, nil))".format(spacing, angle))
+        if min_projection is None or min_projection == 0:
+            min_projection = 'nil'
+        tp.queue("_output(out1, in1.space_check({}, false, Region.Projection, {}, {}, nil))".format(spacing, angle, min_projection))
 
         border = 1.1 * spacing
         tp.tile_border(border, border)
