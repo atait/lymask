@@ -8,7 +8,7 @@ def readme():
 
 
 setup(name='lymask',
-      version='0.1.10',
+      version='0.1.11',
       description='Mask dataprep with klayout',
       long_description=readme(),
       url='https://github.com/atait/lymask/',

@@ -1,4 +1,4 @@
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 __lygadget_link__ = ['lygadgets', 'yaml']
 
 from lymask.utilities import active_technology, set_active_technology
