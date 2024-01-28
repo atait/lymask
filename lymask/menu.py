@@ -1,5 +1,5 @@
 ''' This stuff only runs in GUI mode '''
-from lygadgets import pya
+from lygadgets import pya, message_loud
 import glob
 import os
 
@@ -56,9 +56,18 @@ def _gen_drc_action(drc_file):
     return _gen_new_action(wrapped)
 
 
+def _gen_path_action(tostr, pathstr):
+    def wrapped():
+        message_loud((
+            'Path to {}\n'.format(tostr) +
+            'Copy this path and paste wherever.\n\n' +
+            pathstr
+        ))
+    return _gen_new_action(wrapped)
+
+
 def dataprep_yml_to_menu(dataprep_file, menu_path='lymask_menu.dataprep'):
-    ''' Goes through all .yml files in the given directory and adds a menu item for each one
-        These files are passed into the drc-like engine that uses Region to do dataprep steps in python
+    ''' Takes a .yml file and adds a menu item that runs that file in lymask's drc or dataprep.
     '''
     menu = pya.Application.instance().main_window().menu()
     subloop_name = os.path.splitext(os.path.basename(dataprep_file))[0]
@@ -73,6 +82,23 @@ def dataprep_yml_to_menu(dataprep_file, menu_path='lymask_menu.dataprep'):
         menu.insert_item(menu_path + '.begin', subloop_name, action)
     else:
         menu.insert_item(menu_path + '.end', subloop_name, action)
+
+
+def path_opener_to_menu(menu_path='lymask_menu.dataprep'):
+    menu = pya.Application.instance().main_window().menu()
+    tech = active_technology()
+    if menu_path.endswith('dataprep'):
+        category = 'dataprep'
+    elif menu_path.endswith('drc'):
+        category = 'drc'
+    else:
+        raise ValueError('Must give this a .dataprep or .drc menu_path')
+    path = tech.eff_path(category)
+    action = _gen_path_action(tech.name + ' ' + category, path)
+    subloop_name = 'Path to {}:{}'.format(tech.name, category)
+    action.title = subloop_name
+    menu.insert_separator(menu_path + '.end', 'SEP')
+    menu.insert_item(menu_path + '.end', subloop_name, action)
 
 
 def reload_lymask_menu(category='dataprep', tech_name=None):
@@ -95,4 +121,6 @@ def reload_lymask_menu(category='dataprep', tech_name=None):
     # insert new ones
     for ymlfile in glob.iglob(ymlfile_dir + '/*.yml'):
         dataprep_yml_to_menu(ymlfile, menu_path=menu_path)
+    # Path opener
+    path_opener_to_menu(menu_path=menu_path)
 
