@@ -94,10 +94,9 @@ def inclusion(cell, rdb, inner, outer, include):
     # do it
     rin = as_region(cell, inner)
     rout = as_region(cell, outer)
-    # violations = rin.sized(include / dbu) - rout
-    big_rin = fast_sized(rin, include / dbu)
+    small_rout = fast_sized(rout, -include / dbu)
     # Note: this could be parallelized, but it is easier I think than sizing
-    violations = big_rin - rout
+    violations = rin - small_rout
 
     rdb_create(rdb, cell, rdb_category, violations)
 
