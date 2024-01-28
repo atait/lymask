@@ -20,6 +20,30 @@ def dpStep(step_fun):
     return step_fun
 
 
+def delete_dollar_duplicates(cell):
+    ''' pya sometimes adds a second top cell or duplicates of other cells.
+        Other layout programs and lithography tools cannot parse this easily.
+        These all end with '$1', so they can be removed recursively
+    '''
+    layout = cell.layout()
+    if cell.name.endswith('$1'):
+        try:
+            cell.delete()
+        except RuntimeError as err:
+            if 'mp_v->is_used (m_n)' in err.args[0]:
+                pass
+            elif 'Not a valid cell index' not in err.args[0]:
+                print('BAD CELL INDEX', chop_cell.name)
+                pass
+            else:
+                raise
+        return
+    to_delete = set()
+    for child_id in cell.each_child_cell():
+        child_cell = layout.cell(child_id)
+        delete_dollar_duplicates(child_cell)
+
+
 def dpStep_phidl(step_fun):
     ''' phidl version, where the mutable object is a phidl.Device not a pya.Cell
         Each step must accept one argument that is Device, plus optionals, and not return
@@ -34,6 +58,7 @@ def dpStep_phidl(step_fun):
         anyCell_to_anyCell(cell, phidl_device)
         step_fun(phidl_device, *args, **kwargs)
         anyCell_to_anyCell(phidl_device, cell)
+        delete_dollar_duplicates(cell)
     all_dpfunc_dict[step_fun.__name__] = wrapper
     return wrapper
 
